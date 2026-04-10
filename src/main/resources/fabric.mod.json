@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "imaginemorefun",
+	"version": "${version}",
+	"name": "ImagineMoreFun",
+	"description": "A merged quality-of-life mod for the ImagineFun Minecraft server, bundling Not Riding Alert, Pim!, and SkinCache in one Fabric 1.21.11 JAR.",
+	"authors": [
+		"Weikeng Chen"
+	],
+	"contact": {
+		"sources": "https://github.com/weikengchen/imf"
+	},
+	"license": "CC0-1.0 AND MIT",
+	"icon": "assets/imaginemorefun/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.chenweikeng.imf.ImfClient"
+		],
+		"modmenu": [
+			"com.chenweikeng.imf.nra.config.ModMenuApiImpl"
+		]
+	},
+	"mixins": [
+		"imf.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*",
+		"cloth-config": ">=21.11.153"
+	},
+	"suggests": {
+		"monkeycraft": "*"
+	}
+}

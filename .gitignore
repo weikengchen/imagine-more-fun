@@ -1,0 +1,37 @@
+# gradle
+.gradle/
+build/
+out/
+classes/
+
+# eclipse
+*.launch
+
+# idea
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# vscode
+.settings/
+.vscode/
+bin/
+.classpath
+.project
+
+# macOS
+.DS_Store
+
+# fabric
+run/
+
+# java crash logs
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr
+
+# native helper build artifacts (.NET intermediate outputs)
+native/windows/obj/
+native/windows/bin/

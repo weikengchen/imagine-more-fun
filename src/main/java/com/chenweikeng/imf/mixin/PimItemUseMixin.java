@@ -1,0 +1,131 @@
+package com.chenweikeng.imf.mixin;
+
+import com.chenweikeng.imf.pim.PimClient;
+import com.chenweikeng.imf.pim.PimState;
+import com.chenweikeng.imf.pim.tracker.BossBarTracker;
+import com.chenweikeng.imf.pim.trader.PinTrader;
+import com.chenweikeng.imf.pim.trader.PinTraderRegistry;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+@Mixin(Minecraft.class)
+public class PimItemUseMixin {
+  private static final long COOLDOWN_MS = 5000;
+  private static final long POST_DISABLE_COOLDOWN_MS = 3000;
+  private static long lastTriggerTime = 0;
+  private static long pimDisabledTime = 0;
+
+  @Inject(at = @At("HEAD"), method = "startUseItem", cancellable = true)
+  public void onStartUseItem(CallbackInfo ci) {
+    if (!PimClient.isImagineFunServer()) {
+      return;
+    }
+
+    var player = Minecraft.getInstance().player;
+
+    if (player == null) {
+      return;
+    }
+
+    ItemStack mainHandItem = player.getMainHandItem();
+    ItemStack offHandItem = player.getOffhandItem();
+
+    if (checkIFoneAndHandle(mainHandItem) || checkIFoneAndHandle(offHandItem)) {
+      ci.cancel();
+      return;
+    }
+  }
+
+  @Inject(at = @At("HEAD"), method = "startAttack", cancellable = true)
+  public void onStartAttack(CallbackInfoReturnable<Boolean> ci) {
+    if (!PimClient.isImagineFunServer()) {
+      return;
+    }
+
+    var player = Minecraft.getInstance().player;
+
+    if (player == null) {
+      return;
+    }
+
+    ItemStack mainHandItem = player.getMainHandItem();
+    ItemStack offHandItem = player.getOffhandItem();
+
+    if (checkIFoneAndHandle(mainHandItem) || checkIFoneAndHandle(offHandItem)) {
+      ci.setReturnValue(false);
+    }
+  }
+
+  private boolean checkIFoneAndHandle(ItemStack itemStack) {
+    String displayName = itemStack.getDisplayName().getString();
+    String registryName = BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString();
+
+    if (!"[IFone (Right Click)]".equals(displayName)
+        || (!"minecraft:iron_axe".equals(registryName)
+            && !"minecraft:netherite_sword".equals(registryName))) {
+      return false;
+    }
+
+    if (PimState.isEnabled()) {
+      long currentTime = System.currentTimeMillis();
+      long timeSinceLastTrigger = currentTime - lastTriggerTime;
+
+      if (timeSinceLastTrigger >= COOLDOWN_MS) {
+        lastTriggerTime = currentTime;
+        handlePimWarp();
+      }
+      return true;
+    }
+
+    long currentTime = System.currentTimeMillis();
+    if (currentTime - pimDisabledTime < POST_DISABLE_COOLDOWN_MS) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private void handlePimWarp() {
+    if (!PimState.hasNextWarpPoint()) {
+      LocalPlayer player = Minecraft.getInstance().player;
+
+      if (player != null) {
+        player.connection.sendCommand("w pin");
+        player.displayClientMessage(
+            Component.literal(
+                "§6✨ §e[Pim] §fAll pin traders visited! Returning to Westward Ho Trading Company."),
+            false);
+        BossBarTracker.getInstance().disable();
+        PimState.setEnabled(false);
+        PimState.resetWarpPoint();
+        pimDisabledTime = System.currentTimeMillis();
+      }
+      return;
+    }
+
+    String warpPoint = PimState.getCurrentWarpPoint();
+    LocalPlayer player = Minecraft.getInstance().player;
+
+    if (player != null && warpPoint != null) {
+      PinTrader trader =
+          PinTraderRegistry.getInstance().getTraderByPosition(PimState.getCurrentTraderPosition());
+      String locationName = trader != null ? trader.getLocation().getName() : warpPoint;
+
+      PimState.setActiveWarpPoint(warpPoint);
+      player.connection.sendCommand("w " + warpPoint);
+      player.displayClientMessage(
+          Component.literal("§b➜ §a[Pim] §fWarping to §e" + locationName), false);
+      PimClient.LOGGER.info("Pim: Warping to " + warpPoint);
+      BossBarTracker.getInstance().enable();
+      PimState.incrementWarpPoint();
+    }
+  }
+}

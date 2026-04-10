@@ -1,0 +1,45 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.chenweikeng.imf.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [],
+	"client": [
+		"NraAvatarRendererMixin",
+		"NraBossHealthOverlayAccessor",
+		"NraChatListenerMixin",
+		"NraClientLevelMixin",
+		"NraClientPacketListenerCommandMixin",
+		"NraClientPacketListenerMixin",
+		"NraCommandMixin",
+		"NraEntityRendererMixin",
+		"NraGameRendererMixin",
+		"NraGuiMixin",
+		"NraLivingEntityMixin",
+		"NraLocalPlayerMixin",
+		"NraMinecraftMixin",
+		"NraMinecraftScreenMixin",
+		"NraSoundOptionsScreenMixin",
+		"NraToastManagerMixin",
+		"PimAbstractContainerScreenMixin",
+		"PimBossHealthOverlayMixin",
+		"PimClientPacketListenerMixin",
+		"PimClientTickMixin",
+		"PimGuiMixin",
+		"PimItemUseMixin",
+		"PimScreenAccessor",
+		"SkinCacheClientChunkCacheMixin",
+		"SkinCacheCustomHeadLayerMixin",
+		"SkinCacheMinecraftMixin",
+		"SkinCachePlayerSkinRenderCacheMixin",
+		"SkinCacheSkinManagerMixin",
+		"SkinCacheSkinTextureDownloaderMixin",
+		"SkinCacheSkullBlockRendererMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
