@@ -209,7 +209,7 @@ public class WebViewBridge {
         }
         break;
       case "loaded":
-        LOGGER.info("Page loaded: {}", response.optString("url", ""));
+        LOGGER.debug("Page loaded: {}", response.optString("url", ""));
         break;
       case "console":
         String level = response.optString("level", "log");
@@ -217,7 +217,7 @@ public class WebViewBridge {
         if ("error".equals(level) || "uncaught".equals(level) || "rejection".equals(level)) {
           LOGGER.warn("[JS {}] {}", level, msg);
         } else if ("warn".equals(level)) {
-          LOGGER.info("[JS {}] {}", level, msg);
+          LOGGER.debug("[JS {}] {}", level, msg);
         }
         break;
       case "error":
@@ -244,14 +244,14 @@ public class WebViewBridge {
     // 1. Check cached location first (previously extracted binary)
     Path userPath = dir.resolve(binaryName);
     if (Files.isExecutable(userPath)) {
-      LOGGER.info("Using existing WebView helper at: {}", userPath);
+      LOGGER.debug("Using existing WebView helper at: {}", userPath);
       return userPath;
     }
 
     // 2. Check alongside game JAR
     Path gameDirPath = Path.of(binaryName);
     if (Files.isExecutable(gameDirPath)) {
-      LOGGER.info("Using existing WebView helper at: {}", gameDirPath);
+      LOGGER.debug("Using existing WebView helper at: {}", gameDirPath);
       return gameDirPath;
     }
 
@@ -265,8 +265,7 @@ public class WebViewBridge {
 
     Path extracted =
         extractResource(
-            "/native/" + (isMac ? "macos/" : "windows/") + binaryName,
-            dir.resolve(binaryName));
+            "/native/" + (isMac ? "macos/" : "windows/") + binaryName, dir.resolve(binaryName));
     if (extracted != null && isWin) {
       extractResource("/native/windows/WebView2Loader.dll", dir.resolve("WebView2Loader.dll"));
     }
@@ -316,7 +315,7 @@ public class WebViewBridge {
         Files.deleteIfExists(tempPath);
       }
 
-      LOGGER.info("Extracted resource {} to {}", resourcePath, targetPath);
+      LOGGER.debug("Extracted resource {} to {}", resourcePath, targetPath);
       return targetPath;
     } catch (IOException e) {
       LOGGER.error("Failed to extract resource {} to {}", resourcePath, targetPath, e);

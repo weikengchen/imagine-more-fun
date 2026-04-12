@@ -340,7 +340,7 @@ public class ProfileManagementScreen extends Screen {
 
     // Draw title
     Component title =
-        Component.literal("Not Riding Alert").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA);
+        Component.literal("ImagineMoreFun").withStyle(ChatFormatting.BOLD, ChatFormatting.AQUA);
     graphics.drawCenteredString(font, title, width / 2, 8, LABEL_COLOR);
 
     // Draw progress bars below title, all in same row divided by 3

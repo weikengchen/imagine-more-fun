@@ -9,7 +9,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 
 public class SoundHelper {
-  private static final String NOTIFICATION_TITLE = "Not Riding Alert";
+  private static final String NOTIFICATION_TITLE = "ImagineMoreFun";
   private static final String NOTIFICATION_BODY = "You are not riding!";
 
   public static void playConfiguredSound(Minecraft client) {

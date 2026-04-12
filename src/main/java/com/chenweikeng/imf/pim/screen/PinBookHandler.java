@@ -127,14 +127,14 @@ public class PinBookHandler {
       if (!pendingMissingSeries.isEmpty()) {
         player.displayClientMessage(
             Component.literal(
-                "§c⚠ §e[Pim] §fSome required pin series information is missing. Please open §e/pinrarity §fto update the pin series information."),
+                "§c⚠ §e[IMF] §fSome required pin series information is missing. Please open §e/pinrarity §fto update the pin series information."),
             false);
       }
 
       if (!pendingNewSeries.isEmpty()) {
         player.displayClientMessage(
             Component.literal(
-                "§6✨ §e[Pim] §fFound §e"
+                "§6✨ §e[IMF] §fFound §e"
                     + pendingNewSeries.size()
                     + "§f new pin pack"
                     + (pendingNewSeries.size() == 1 ? "" : "s")

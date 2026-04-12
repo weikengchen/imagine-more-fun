@@ -24,12 +24,18 @@
 	"mixins": [
 		"imf.mixins.json"
 	],
+	"accessWidener": "imf.accesswidener",
 	"depends": {
 		"fabricloader": ">=0.18.4",
 		"minecraft": "~1.21.11",
 		"java": ">=21",
 		"fabric-api": "*",
 		"cloth-config": ">=21.11.153"
+	},
+	"breaks": {
+		"not-riding-alert": "*",
+		"pim": "*",
+		"skincache": "*"
 	},
 	"suggests": {
 		"monkeycraft": "*"

@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
  * Single client entrypoint for the merged ImagineMoreFun mod.
  *
  * <p>This class wires together three formerly-independent mods into one. Each sub-mod's original
- * initializer is still invoked unchanged — the order is NRA → PIM → SkinCache, but none of them
- * has a hard dependency on another, so the order is not load-bearing.
+ * initializer is still invoked unchanged — the order is NRA → PIM → SkinCache, but none of them has
+ * a hard dependency on another, so the order is not load-bearing.
  *
  * <p>Storage migration runs exactly once before any sub-mod initializer touches the filesystem.
  */

@@ -1,6 +1,7 @@
 package com.chenweikeng.imf.mixin;
 
 import com.chenweikeng.imf.pim.PimClient;
+import com.chenweikeng.imf.pim.pinpack.PinPackColorAnalyzer;
 import com.chenweikeng.imf.pim.screen.InventoryHandler;
 import com.chenweikeng.imf.pim.screen.PinBookHandler;
 import com.chenweikeng.imf.pim.screen.PinDetailHandler;
@@ -54,26 +55,52 @@ public class PimAbstractContainerScreenMixin {
       return;
     }
 
-    // InventoryScreen or ContainerScreen
+    // Check for pin packs (in player inventory slots, or inside shulker boxes)
+    boolean isPlayerInventory = slot.container instanceof Inventory;
+    boolean isShulkerBoxContent = screen instanceof ShulkerBoxScreen && !isPlayerInventory;
+    if (isPlayerInventory || isShulkerBoxContent) {
+      Integer packColor = PinPackColorAnalyzer.getPackColor(itemStack);
+      if (packColor != null) {
+        renderItemWithFills(guiGraphics, slot, itemStack, font, packColor, null, ci);
+        return;
+      }
+    }
+
+    // Check for pin packs in the Pin Box Trader shop
+    String titleStr = screenAccessor.pim$getTitle().getString();
+    if (titleStr.contains("Pin Box Trader") && !isPlayerInventory) {
+      Integer shopPackColor = PinPackColorAnalyzer.getShopPackColor(itemStack);
+      if (shopPackColor != null) {
+        renderItemWithFills(guiGraphics, slot, itemStack, font, shopPackColor, null, ci);
+        return;
+      }
+    }
+
+    // Pins in player inventory or shulker box contents
     PinDetailHandler.PinDetailEntry entry2 = PinDetailHandler.parsePinEntry(itemStack);
-    if (entry2 != null
-        && entry2.condition == PinDetailHandler.PinCondition.MINT
-        && slot.container instanceof Inventory) {
+    if (entry2 != null && (isPlayerInventory || isShulkerBoxContent)) {
       String pinSeries = PinDetailHandler.parsePinSeriesFromLore(itemStack);
       if (pinSeries == null) {
         return;
       }
-      Set<String> missingMintPinNames =
-          screen.getMenu() != null
-              ? InventoryHandler.getInstance().getMissingMintPinNames(screen.getMenu().slots)
-              : Set.of();
 
-      String key = pinSeries + ":" + entry2.pinName;
-      if (missingMintPinNames.contains(key)) {
-        renderItemWithFills(guiGraphics, slot, itemStack, font, 0xFF00FF00, null, ci);
-        return;
+      if (entry2.condition == PinDetailHandler.PinCondition.MINT) {
+        Set<String> missingMintPinNames =
+            screen.getMenu() != null
+                ? InventoryHandler.getInstance().getMissingMintPinNames(screen.getMenu().slots)
+                : Set.of();
+
+        String key = pinSeries + ":" + entry2.pinName;
+        if (missingMintPinNames.contains(key)) {
+          renderItemWithFills(guiGraphics, slot, itemStack, font, 0xFF00FF00, null, ci);
+          return;
+        } else {
+          renderItemWithFills(guiGraphics, slot, itemStack, font, 0xFFFFE000, 0x80FFE000, ci);
+          return;
+        }
       } else {
-        renderItemWithFills(guiGraphics, slot, itemStack, font, 0xFFFFE000, 0x80FFE000, ci);
+        // Non-MINT pins get MAGENTA
+        renderItemWithFills(guiGraphics, slot, itemStack, font, null, 0x80FF00FF, ci);
         return;
       }
     }
@@ -82,7 +109,6 @@ public class PimAbstractContainerScreenMixin {
       return;
     }
 
-    String titleStr = screenAccessor.pim$getTitle().getString();
     if (titleStr.contains("\u4e51")) {
       PinBookHandler.PinBookEntry entry = PinBookHandler.getInstance().parsePinbookEntry(itemStack);
 

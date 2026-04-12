@@ -1,0 +1,99 @@
+#!/bin/bash
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="${SCRIPT_DIR}"
+TARGET_DIR="/Users/cusgadmin/Library/Application Support/ModrinthApp/profiles/ImagineFun/mods/"
+
+JAR_NAME="imaginemorefun-3.0.0.jar"
+SOURCE_JAR="${PROJECT_DIR}/build/libs/${JAR_NAME}"
+TARGET_JAR="${TARGET_DIR}/${JAR_NAME}"
+
+# After first run, ImfMigration moves the native helpers here.
+NATIVE_CACHE_DIR="/Users/cusgadmin/Library/Application Support/ModrinthApp/profiles/ImagineFun/config/imaginemorefun/native"
+# Legacy NRA location — ImfMigration.runOnce() will have moved anything useful
+# away from here on first launch, but we clear it too in case a prior run left
+# cached binaries behind.
+LEGACY_NATIVE_CACHE_DIR="/Users/cusgadmin/Library/Application Support/ModrinthApp/profiles/ImagineFun/config/not-riding-alert/native"
+
+# Rebuild native WebView helper binary (must happen before gradlew build so the JAR includes it).
+# Only the macOS helper is rebuilt here; Windows is cross-compiled via the standalone build-all.sh.
+echo "Rebuilding macOS native WebView helper..."
+swiftc -O \
+    -o "${PROJECT_DIR}/src/main/resources/native/macos/webview-helper" \
+    "${PROJECT_DIR}/native/macos/WebViewHelper.swift" \
+    -framework WebKit -framework AppKit
+
+echo "Building ImagineMoreFun mod..."
+cd "${PROJECT_DIR}"
+./gradlew spotlessApply
+./gradlew build
+
+if [ ! -f "${SOURCE_JAR}" ]; then
+    echo "Error: Build artifact not found at ${SOURCE_JAR}"
+    exit 1
+fi
+
+# Clear cached native binaries so the updated ones from the JAR get extracted on next launch.
+for dir in "${NATIVE_CACHE_DIR}" "${LEGACY_NATIVE_CACHE_DIR}"; do
+    if [ -d "${dir}" ]; then
+        echo "Clearing cached native binaries: ${dir}"
+        rm -rf "${dir}"
+    fi
+done
+
+echo "Creating target directory if it doesn't exist..."
+mkdir -p "${TARGET_DIR}"
+
+# Remove the three old independent jars that this merged mod replaces.
+# Their code now lives inside imaginemorefun-*.jar; keeping both loaded would
+# cause mixins and entrypoints to run twice.
+remove_old_jar() {
+    local pattern="$1"
+    local found
+    found=$(find "${TARGET_DIR}" -maxdepth 1 -type f -name "${pattern}" 2>/dev/null || true)
+    if [ -n "${found}" ]; then
+        echo "Removing superseded jar(s) matching ${pattern}:"
+        echo "${found}" | sed 's/^/  - /'
+        echo "${found}" | xargs rm -f
+    fi
+}
+
+remove_old_jar "not-riding-alert-*.jar"
+remove_old_jar "pim-*.jar"
+remove_old_jar "pim2-*.jar"
+remove_old_jar "skin-cache-mod-*.jar"
+
+verify_jar() {
+    local jar_file="$1"
+    unzip -tq "${jar_file}" 2>/dev/null
+}
+
+MAX_RETRIES=3
+RETRY_COUNT=0
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+    echo "Copying jar to ${TARGET_DIR}..."
+    cp -f "${SOURCE_JAR}" "${TARGET_JAR}"
+
+    echo "Verifying copied jar integrity..."
+    if verify_jar "${TARGET_JAR}"; then
+        echo "Jar verification successful!"
+        break
+    else
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo "Warning: Jar verification failed (attempt $RETRY_COUNT/$MAX_RETRIES). Retrying..."
+            sleep 1
+        else
+            echo "Error: Failed to copy a valid jar after $MAX_RETRIES attempts"
+            echo "Source: ${SOURCE_JAR}"
+            echo "Target: ${TARGET_JAR}"
+            exit 1
+        fi
+    fi
+done
+
+echo "Build and deployment complete!"
+echo "Jar copied to: ${TARGET_JAR}"

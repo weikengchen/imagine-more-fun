@@ -2,6 +2,8 @@ package com.chenweikeng.imf.nra.session;
 
 import com.chenweikeng.imf.nra.NotRidingAlertClient;
 import com.chenweikeng.imf.nra.ride.RideName;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SessionTracker {
   private static SessionTracker instance;
@@ -57,6 +59,50 @@ public class SessionTracker {
 
   public int getCurrentStreak() {
     return data != null ? data.currentStreak : 0;
+  }
+
+  public int getPinHoarderTrades() {
+    return data != null ? data.pinHoarderTrades : 0;
+  }
+
+  public int getPinBoxesOpened() {
+    return data != null ? data.pinBoxesOpened : 0;
+  }
+
+  public int getNewMintPinsAdded() {
+    return data != null ? data.newMintPinsAdded : 0;
+  }
+
+  public void onPinHoarderTrade() {
+    if (data != null) {
+      data.checkDateRollover();
+      data.onPinHoarderTrade();
+    }
+  }
+
+  public void onPinBoxOpened() {
+    if (data != null) {
+      data.checkDateRollover();
+      data.onPinBoxOpened();
+    }
+  }
+
+  public void onNewMintPinAdded() {
+    if (data != null) {
+      data.checkDateRollover();
+      data.onNewMintPinAdded();
+    }
+  }
+
+  public void onFoodConsumed(String itemName) {
+    if (data != null) {
+      data.checkDateRollover();
+      data.onFoodConsumed(itemName);
+    }
+  }
+
+  public Map<String, Integer> getFoodConsumed() {
+    return data != null ? data.getFoodConsumed() : new HashMap<>();
   }
 
   public void checkAndSaveIfNeeded() {

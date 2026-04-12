@@ -95,8 +95,7 @@ public final class ImfMigration {
       return;
     }
     if (Files.exists(newDir)) {
-      LOGGER.warn(
-          "Both old dir {} and new dir {} exist; leaving old dir alone", oldDir, newDir);
+      LOGGER.warn("Both old dir {} and new dir {} exist; leaving old dir alone", oldDir, newDir);
       return;
     }
     try {

@@ -236,7 +236,7 @@ public class ClipboardParser {
     Minecraft.getInstance()
         .player
         .displayClientMessage(
-            Component.literal("§6✨ §e[Pim] §fMatched with §b" + playerName + ":"), false);
+            Component.literal("§6✨ §e[IMF] §fMatched with §b" + playerName + ":"), false);
 
     StringBuilder offerText = new StringBuilder();
     StringBuilder takeText = new StringBuilder();
@@ -244,14 +244,14 @@ public class ClipboardParser {
     if (!matchesLookingFor.isEmpty()) {
       Minecraft.getInstance()
           .player
-          .displayClientMessage(Component.literal("§6✨ §e[Pim] §aYou can offer to them:"), false);
+          .displayClientMessage(Component.literal("§6✨ §e[IMF] §aYou can offer to them:"), false);
       for (Map.Entry<String, List<String>> entry : matchesLookingFor.entrySet()) {
         String seriesName = entry.getKey();
         Minecraft.getInstance()
             .player
             .displayClientMessage(
                 Component.literal(
-                    "§6✨ §e[Pim] §f- §9"
+                    "§6✨ §e[IMF] §f- §9"
                         + seriesName
                         + ":§f "
                         + String.join(", ", entry.getValue())),
@@ -268,14 +268,14 @@ public class ClipboardParser {
     if (!matchesForSale.isEmpty()) {
       Minecraft.getInstance()
           .player
-          .displayClientMessage(Component.literal("§6✨ §e[Pim] §aYou need from them:"), false);
+          .displayClientMessage(Component.literal("§6✨ §e[IMF] §aYou need from them:"), false);
       for (Map.Entry<String, List<String>> entry : matchesForSale.entrySet()) {
         String seriesName = entry.getKey();
         Minecraft.getInstance()
             .player
             .displayClientMessage(
                 Component.literal(
-                    "§6✨ §e[Pim] §f- §9"
+                    "§6✨ §e[IMF] §f- §9"
                         + seriesName
                         + ":§f "
                         + String.join(", ", entry.getValue())),
@@ -306,12 +306,12 @@ public class ClipboardParser {
         Minecraft.getInstance()
             .player
             .displayClientMessage(
-                Component.literal("§6✨ §e[Pim] §a✓ Exchange message copied to clipboard!"), false);
+                Component.literal("§6✨ §e[IMF] §a✓ Exchange message copied to clipboard!"), false);
       } catch (Exception e) {
         Minecraft.getInstance()
             .player
             .displayClientMessage(
-                Component.literal("§6✨ §e[Pim] §c⚠ Failed to copy exchange message"), false);
+                Component.literal("§6✨ §e[IMF] §c⚠ Failed to copy exchange message"), false);
       }
     }
   }

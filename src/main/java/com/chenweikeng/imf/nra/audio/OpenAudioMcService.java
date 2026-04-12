@@ -625,7 +625,10 @@ public class OpenAudioMcService {
     if (client != null) {
       client.execute(
           () ->
-              client.gui.getChat().addMessage(Component.literal("\u00A7e[NRA] \u00A7f" + message)));
+              client
+                  .gui
+                  .getChat()
+                  .addMessage(Component.literal("\u00A76\u2728 \u00A7e[IMF] \u00A7f" + message)));
     }
   }
 }

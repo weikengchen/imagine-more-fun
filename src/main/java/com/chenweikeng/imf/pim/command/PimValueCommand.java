@@ -58,7 +58,7 @@ public class PimValueCommand {
                     () -> {
                       source.sendFeedback(
                           Component.literal(
-                              "§6✨ §e[Pim] §cError during calculation: " + e.getMessage()));
+                              "§6✨ §e[IMF] §cError during calculation: " + e.getMessage()));
                     });
           }
         });
@@ -70,7 +70,7 @@ public class PimValueCommand {
             () -> {
               source.sendFeedback(
                   Component.literal(
-                      "§6✨ §e[Pim] §6Player Specific Values for Required Pin Series"));
+                      "§6✨ §e[IMF] §6Player Specific Values for Required Pin Series"));
             });
 
     Map<String, Map<Rarity, Double>> allPrices = new TreeMap<>();
@@ -95,7 +95,7 @@ public class PimValueCommand {
               () -> {
                 source.sendFeedback(
                     Component.literal(
-                        "§6✨ §e[Pim] §cNo player specific values available. Please ensure you have pin series data."));
+                        "§6✨ §e[IMF] §cNo player specific values available. Please ensure you have pin series data."));
               });
       return;
     }
@@ -141,7 +141,7 @@ public class PimValueCommand {
             () -> {
               source.sendFeedback(
                   Component.literal(
-                      "§6✨ §e[Pim] §6Showing " + priceCount + " Required pin series with values"));
+                      "§6✨ §e[IMF] §6Showing " + priceCount + " Required pin series with values"));
             });
   }
 

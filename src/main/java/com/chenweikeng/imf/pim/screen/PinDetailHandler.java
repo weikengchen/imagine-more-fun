@@ -1,5 +1,6 @@
 package com.chenweikeng.imf.pim.screen;
 
+import com.chenweikeng.imf.nra.session.SessionTracker;
 import com.chenweikeng.imf.pim.PimClient;
 import com.chenweikeng.imf.pim.pin.Rarity;
 import com.google.gson.Gson;
@@ -65,12 +66,22 @@ public class PinDetailHandler {
     PinDetailEntry existingEntry = seriesMap.get(parsedEntry.pinName);
     boolean added = false;
     boolean updated = false;
+    boolean newMintAdded = false;
 
     if (existingEntry == null) {
       seriesMap.put(parsedEntry.pinName, parsedEntry);
       added = true;
+      // Track if this is a new MINT pin being added for the first time
+      if (parsedEntry.condition == PinCondition.MINT) {
+        newMintAdded = true;
+      }
     } else {
       if (existingEntry.condition != parsedEntry.condition) {
+        // Track when a pin changes to MINT (was previously LOCKED or NOTMINT)
+        if (parsedEntry.condition == PinCondition.MINT
+            && existingEntry.condition != PinCondition.MINT) {
+          newMintAdded = true;
+        }
         existingEntry.condition = parsedEntry.condition;
         updated = true;
       }
@@ -82,6 +93,10 @@ public class PinDetailHandler {
 
     if (added) {
       pendingUpdatedCountBySeries.merge(currentOpenedPinSeries, 1, Integer::sum);
+    }
+
+    if (newMintAdded) {
+      SessionTracker.getInstance().onNewMintPinAdded();
     }
 
     if (added || updated) {
@@ -104,7 +119,7 @@ public class PinDetailHandler {
         if (count > 0) {
           player.displayClientMessage(
               Component.literal(
-                  "§6✨ §e[Pim] §fThe pin detail information has been updated for §e"
+                  "§6✨ §e[IMF] §fThe pin detail information has been updated for §e"
                       + count
                       + "§f pin"
                       + (count == 1 ? "" : "s")

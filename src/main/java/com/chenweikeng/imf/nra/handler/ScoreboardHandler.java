@@ -8,7 +8,6 @@ import com.chenweikeng.imf.nra.wizard.TutorialManager;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -113,30 +112,22 @@ public class ScoreboardHandler {
     ticksUntilNextReminder = SCOREBOARD_REMINDER_INTERVAL;
 
     Component message =
-        Component.empty()
-            .withStyle(ChatFormatting.AQUA)
+        Component.literal("§6✨ §e[IMF] §fThe mod requires ")
             .append(
-                Component.literal("[NRA] ")
-                    .withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.BOLD))
-            .append(Component.literal("The mod requires ").withStyle(ChatFormatting.WHITE))
-            .append(
-                Component.literal("/sb")
+                Component.literal("§b/sb")
                     .withStyle(
                         s ->
-                            s.withColor(ChatFormatting.AQUA)
-                                .withUnderlined(true)
-                                .withClickEvent(new ClickEvent.RunCommand("sb"))))
+                            s.withUnderlined(true).withClickEvent(new ClickEvent.RunCommand("sb"))))
             .append(
-                Component.literal(" to receive scoreboard from server. You can hide scoreboard in ")
-                    .withStyle(ChatFormatting.WHITE))
+                Component.literal(
+                    "§f to receive scoreboard from server. You can hide scoreboard in "))
             .append(
-                Component.literal("/nra")
+                Component.literal("§b/nra")
                     .withStyle(
                         s ->
-                            s.withColor(ChatFormatting.AQUA)
-                                .withUnderlined(true)
+                            s.withUnderlined(true)
                                 .withClickEvent(new ClickEvent.RunCommand("nra"))))
-            .append(Component.literal(" later if you want.").withStyle(ChatFormatting.WHITE));
+            .append(Component.literal("§f later if you want."));
 
     client.player.displayClientMessage(message, false);
   }

@@ -36,7 +36,7 @@ public class PimExportCommand {
                 Minecraft mc = Minecraft.getInstance();
 
                 if (mc.player == null) {
-                  source.sendFeedback(Component.literal("§6✨ §e[Pim] §cError: Player not found!"));
+                  source.sendFeedback(Component.literal("§6✨ §e[IMF] §cError: Player not found!"));
                   return;
                 }
 
@@ -89,14 +89,14 @@ public class PimExportCommand {
 
                 try {
                   mc.keyboardHandler.setClipboard(finalExport);
-                  source.sendFeedback(Component.literal("§6✨ §e[Pim] §a✓ Copied to clipboard!"));
+                  source.sendFeedback(Component.literal("§6✨ §e[IMF] §a✓ Copied to clipboard!"));
                 } catch (Exception e) {
                   source.sendFeedback(
-                      Component.literal("§6✨ §e[Pim] §c⚠ Failed to copy to clipboard"));
+                      Component.literal("§6✨ §e[IMF] §c⚠ Failed to copy to clipboard"));
                 }
               } catch (Exception e) {
                 source.sendFeedback(
-                    Component.literal("§6✨ §e[Pim] §cError exporting pins: " + e.getMessage()));
+                    Component.literal("§6✨ §e[IMF] §cError exporting pins: " + e.getMessage()));
               }
             });
   }

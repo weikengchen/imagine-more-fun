@@ -88,7 +88,7 @@ public class Page7Profiles extends WizardPage {
 
   private Component welcomeSection() {
     Component content = literal("");
-    content = append(content, colored("\nWelcome to Not Riding Alert!\n\n", ChatFormatting.GOLD));
+    content = append(content, colored("\nWelcome to ImagineMoreFun!\n\n", ChatFormatting.GOLD));
     content = append(content, literal("Thank you for using this mod. "));
     content = append(content, colored("Enjoy your rides! ", ChatFormatting.GREEN));
     content = append(content, colored("🎢", ChatFormatting.WHITE));

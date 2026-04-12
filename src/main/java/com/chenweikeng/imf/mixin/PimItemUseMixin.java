@@ -1,5 +1,6 @@
 package com.chenweikeng.imf.mixin;
 
+import com.chenweikeng.imf.nra.tracker.FoodConsumptionTracker;
 import com.chenweikeng.imf.pim.PimClient;
 import com.chenweikeng.imf.pim.PimState;
 import com.chenweikeng.imf.pim.tracker.BossBarTracker;
@@ -25,7 +26,10 @@ public class PimItemUseMixin {
 
   @Inject(at = @At("HEAD"), method = "startUseItem", cancellable = true)
   public void onStartUseItem(CallbackInfo ci) {
+    PimClient.LOGGER.info("[PimItemUseMixin] startUseItem called");
+
     if (!PimClient.isImagineFunServer()) {
+      PimClient.LOGGER.info("[PimItemUseMixin] Not on ImagineFun server");
       return;
     }
 
@@ -38,9 +42,27 @@ public class PimItemUseMixin {
     ItemStack mainHandItem = player.getMainHandItem();
     ItemStack offHandItem = player.getOffhandItem();
 
+    PimClient.LOGGER.info(
+        "[PimItemUseMixin] mainHand: {}, isTrackableFood: {}",
+        mainHandItem.getHoverName().getString(),
+        FoodConsumptionTracker.isTrackableFood(mainHandItem));
+
     if (checkIFoneAndHandle(mainHandItem) || checkIFoneAndHandle(offHandItem)) {
       ci.cancel();
       return;
+    }
+
+    // Track food consumption for items with FOOD_TYPE NBT
+    int selectedSlot = player.getInventory().getSelectedSlot();
+    if (FoodConsumptionTracker.isTrackableFood(mainHandItem)) {
+      PimClient.LOGGER.info(
+          "[PimItemUseMixin] Tracking food: {}", mainHandItem.getHoverName().getString());
+      FoodConsumptionTracker.getInstance().onItemUseStart(mainHandItem, selectedSlot);
+    } else if (FoodConsumptionTracker.isTrackableFood(offHandItem)) {
+      // Offhand slot is 40
+      PimClient.LOGGER.info(
+          "[PimItemUseMixin] Tracking offhand food: {}", offHandItem.getHoverName().getString());
+      FoodConsumptionTracker.getInstance().onItemUseStart(offHandItem, 40);
     }
   }
 
@@ -101,7 +123,7 @@ public class PimItemUseMixin {
         player.connection.sendCommand("w pin");
         player.displayClientMessage(
             Component.literal(
-                "§6✨ §e[Pim] §fAll pin traders visited! Returning to Westward Ho Trading Company."),
+                "§6✨ §e[IMF] §fAll pin traders visited! Returning to Westward Ho Trading Company."),
             false);
         BossBarTracker.getInstance().disable();
         PimState.setEnabled(false);
@@ -122,7 +144,7 @@ public class PimItemUseMixin {
       PimState.setActiveWarpPoint(warpPoint);
       player.connection.sendCommand("w " + warpPoint);
       player.displayClientMessage(
-          Component.literal("§b➜ §a[Pim] §fWarping to §e" + locationName), false);
+          Component.literal("§b➜ §e[IMF] §fWarping to §e" + locationName), false);
       PimClient.LOGGER.info("Pim: Warping to " + warpPoint);
       BossBarTracker.getInstance().enable();
       PimState.incrementWarpPoint();

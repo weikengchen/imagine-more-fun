@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class DailyReportGenerator {
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
@@ -99,6 +100,9 @@ public class DailyReportGenerator {
 
     Integer previousDayRides = prevSnap != null ? prevSnap.ridesCompleted : null;
 
+    // Sort food consumption by item name
+    Map<String, Integer> sortedFood = new TreeMap<>(todaySnap.foodConsumed);
+
     return new DailyReport(
         date,
         todaySnap.ridesCompleted,
@@ -114,7 +118,11 @@ public class DailyReportGenerator {
         previousDayRides,
         prevDate,
         isFirstDay,
-        false);
+        false,
+        todaySnap.pinHoarderTrades,
+        todaySnap.pinBoxesOpened,
+        todaySnap.newMintPinsAdded,
+        sortedFood);
   }
 
   /** Generates a live preview report for today using current in-memory ride counts and session. */
@@ -204,6 +212,9 @@ public class DailyReportGenerator {
 
     Integer previousDayRides = prevSnap != null ? prevSnap.ridesCompleted : null;
 
+    // Sort food consumption by item name
+    Map<String, Integer> sortedFood = new TreeMap<>(session.getFoodConsumed());
+
     return new DailyReport(
         todayDate,
         ridesCompleted,
@@ -219,6 +230,10 @@ public class DailyReportGenerator {
         previousDayRides,
         prevDate,
         isFirstDay,
-        true);
+        true,
+        session.getPinHoarderTrades(),
+        session.getPinBoxesOpened(),
+        session.getNewMintPinsAdded(),
+        sortedFood);
   }
 }

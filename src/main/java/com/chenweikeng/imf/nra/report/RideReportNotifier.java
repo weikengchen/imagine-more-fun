@@ -3,7 +3,6 @@ package com.chenweikeng.imf.nra.report;
 import com.chenweikeng.imf.nra.config.ModConfig;
 import com.chenweikeng.imf.nra.config.RideReportNotifyMode;
 import com.chenweikeng.imf.nra.report.ui.RideReportScreen;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -88,18 +87,11 @@ public class RideReportNotifier {
     }
 
     Component message =
-        Component.empty()
+        Component.literal("§6✨ §e[IMF] §6Your daily ride report is ready! ")
             .append(
-                Component.literal("[NRA] ")
-                    .withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.BOLD))
-            .append(
-                Component.literal("Your daily ride report is ready! ")
-                    .withStyle(ChatFormatting.GOLD))
-            .append(
-                Component.literal("[Click to view]")
+                Component.literal("§b[Click to view]")
                     .withStyle(
                         Style.EMPTY
-                            .withColor(ChatFormatting.AQUA)
                             .withUnderlined(true)
                             .withClickEvent(new ClickEvent.RunCommand("/nra ridereport"))
                             .withHoverEvent(

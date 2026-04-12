@@ -1,8 +1,8 @@
 package com.chenweikeng.imf.nra.compat;
 
+import com.chenweikeng.imf.nra.GameState;
 import com.chenweikeng.monkeycraft_api.v1.CommandExecutionResult;
 import com.chenweikeng.monkeycraft_api.v1.MonkeycraftApi;
-import com.chenweikeng.imf.nra.GameState;
 
 final class MonkeycraftCompatImpl {
   static void init() {

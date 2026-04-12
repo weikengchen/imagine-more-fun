@@ -25,13 +25,13 @@ public class PimTradeCommand {
                         .getSource()
                         .sendFeedback(
                             Component.literal(
-                                "§6✨ §e[Pim] §fUse the IFone to warp to the first pin trader."));
+                                "§6✨ §e[IMF] §fUse the IFone to warp to the first pin trader."));
                   } else {
                     BossBarTracker.getInstance().disable();
                     context
                         .getSource()
                         .sendFeedback(
-                            Component.literal("§6✨ §e[Pim] §fPin trading has been stopped."));
+                            Component.literal("§6✨ §e[IMF] §fPin trading has been stopped."));
                   }
                   return 1;
                 }));

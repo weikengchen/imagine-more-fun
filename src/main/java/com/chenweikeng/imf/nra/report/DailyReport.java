@@ -2,6 +2,7 @@ package com.chenweikeng.imf.nra.report;
 
 import com.chenweikeng.imf.nra.ride.RideName;
 import java.util.List;
+import java.util.Map;
 
 public class DailyReport {
   public final String date;
@@ -23,6 +24,14 @@ public class DailyReport {
   public final boolean isFirstDay;
   public final boolean isLive;
 
+  // Pin activity stats
+  public final int pinHoarderTrades;
+  public final int pinBoxesOpened;
+  public final int newMintPinsAdded;
+
+  // Food consumption stats (sorted by item name)
+  public final Map<String, Integer> foodConsumed;
+
   public DailyReport(
       String date,
       int totalRides,
@@ -38,7 +47,11 @@ public class DailyReport {
       Integer previousDayRides,
       String previousRideDate,
       boolean isFirstDay,
-      boolean isLive) {
+      boolean isLive,
+      int pinHoarderTrades,
+      int pinBoxesOpened,
+      int newMintPinsAdded,
+      Map<String, Integer> foodConsumed) {
     this.date = date;
     this.totalRides = totalRides;
     this.totalRideTimeSeconds = totalRideTimeSeconds;
@@ -54,6 +67,10 @@ public class DailyReport {
     this.previousRideDate = previousRideDate;
     this.isFirstDay = isFirstDay;
     this.isLive = isLive;
+    this.pinHoarderTrades = pinHoarderTrades;
+    this.pinBoxesOpened = pinBoxesOpened;
+    this.newMintPinsAdded = newMintPinsAdded;
+    this.foodConsumed = foodConsumed;
   }
 
   public static class RideDelta {

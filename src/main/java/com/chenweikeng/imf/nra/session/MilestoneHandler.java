@@ -2,7 +2,6 @@ package com.chenweikeng.imf.nra.session;
 
 import com.chenweikeng.imf.nra.util.SoundHelper;
 import com.chenweikeng.imf.nra.util.TimeFormatUtil;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
@@ -28,15 +27,11 @@ public class MilestoneHandler {
 
     String timeStr = TimeFormatUtil.formatDuration(totalRideTimeSeconds);
     Component message =
-        Component.empty()
-            .append(
-                Component.literal("[NRA] ")
-                    .withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.BOLD))
-            .append(
-                Component.literal("Milestone: " + milestone + " rides completed today!")
-                    .withStyle(ChatFormatting.GOLD))
-            .append(
-                Component.literal(" Total ride time: " + timeStr).withStyle(ChatFormatting.YELLOW));
+        Component.literal(
+            "§6✨ §e[IMF] §6Milestone: "
+                + milestone
+                + " rides completed today! §eTotal ride time: "
+                + timeStr);
 
     client.player.displayClientMessage(message, false);
   }

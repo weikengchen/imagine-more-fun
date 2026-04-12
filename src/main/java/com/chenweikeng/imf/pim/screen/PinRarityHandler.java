@@ -91,7 +91,7 @@ public class PinRarityHandler {
     if (player != null) {
       player.displayClientMessage(
           Component.literal(
-              "§6✨ §e[Pim] §fThe pin rarity information has been updated for §e"
+              "§6✨ §e[IMF] §fThe pin rarity information has been updated for §e"
                   + pendingUpdatedCount
                   + "§f pin pack"
                   + (pendingUpdatedCount == 1 ? "" : "s")

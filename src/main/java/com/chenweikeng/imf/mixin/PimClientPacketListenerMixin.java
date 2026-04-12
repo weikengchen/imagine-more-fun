@@ -1,6 +1,7 @@
 package com.chenweikeng.imf.mixin;
 
 import com.chenweikeng.imf.pim.PimClient;
+import com.chenweikeng.imf.pim.hoarder.PinHoarderAutoConfirm;
 import com.chenweikeng.imf.pim.screen.PinBookHandler;
 import com.chenweikeng.imf.pim.screen.PinDetailHandler;
 import com.chenweikeng.imf.pim.screen.PinRarityHandler;
@@ -24,6 +25,9 @@ public class PimClientPacketListenerMixin {
     if (!PimClient.isImagineFunServer()) {
       return;
     }
+
+    // Check for Pin Hoarder auto-confirm
+    PinHoarderAutoConfirm.onContainerContentReceived();
 
     Screen screen = Minecraft.getInstance().screen;
     if (screen != null) {

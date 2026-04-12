@@ -5,6 +5,12 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [],
 	"client": [
+		"ImfAlphaTableContainerScreenMixin",
+		"NraBossEventPacketMixin",
+		"NraEntityGlowMixin",
+		"NraLocalPlayerPositionMixin",
+		"ImfInventoryScreenMixin",
+		"ImfScreenInvoker",
 		"NraAvatarRendererMixin",
 		"NraBossHealthOverlayAccessor",
 		"NraChatListenerMixin",

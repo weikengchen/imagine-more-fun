@@ -36,6 +36,14 @@ public class DailyRideSnapshot {
     public long totalRideTimeSeconds;
     public long totalOnlineSeconds;
     public int streak;
+
+    // Pin activity stats
+    public int pinHoarderTrades;
+    public int pinBoxesOpened;
+    public int newMintPinsAdded;
+
+    // Food consumption stats
+    public Map<String, Integer> foodConsumed = new HashMap<>();
   }
 
   private DailyRideSnapshot() {
@@ -51,7 +59,43 @@ public class DailyRideSnapshot {
 
   public void snapshotDay(
       String date, int ridesCompleted, long totalRideTimeSeconds, long totalOnlineSeconds) {
-    if (ridesCompleted <= 0) {
+    snapshotDay(
+        date, ridesCompleted, totalRideTimeSeconds, totalOnlineSeconds, 0, 0, 0, new HashMap<>());
+  }
+
+  public void snapshotDay(
+      String date,
+      int ridesCompleted,
+      long totalRideTimeSeconds,
+      long totalOnlineSeconds,
+      int pinHoarderTrades,
+      int pinBoxesOpened,
+      int newMintPinsAdded) {
+    snapshotDay(
+        date,
+        ridesCompleted,
+        totalRideTimeSeconds,
+        totalOnlineSeconds,
+        pinHoarderTrades,
+        pinBoxesOpened,
+        newMintPinsAdded,
+        new HashMap<>());
+  }
+
+  public void snapshotDay(
+      String date,
+      int ridesCompleted,
+      long totalRideTimeSeconds,
+      long totalOnlineSeconds,
+      int pinHoarderTrades,
+      int pinBoxesOpened,
+      int newMintPinsAdded,
+      Map<String, Integer> foodConsumed) {
+    if (ridesCompleted <= 0
+        && pinHoarderTrades <= 0
+        && pinBoxesOpened <= 0
+        && newMintPinsAdded <= 0
+        && (foodConsumed == null || foodConsumed.isEmpty())) {
       return;
     }
 
@@ -59,6 +103,12 @@ public class DailyRideSnapshot {
     entry.ridesCompleted = ridesCompleted;
     entry.totalRideTimeSeconds = totalRideTimeSeconds;
     entry.totalOnlineSeconds = totalOnlineSeconds;
+    entry.pinHoarderTrades = pinHoarderTrades;
+    entry.pinBoxesOpened = pinBoxesOpened;
+    entry.newMintPinsAdded = newMintPinsAdded;
+    if (foodConsumed != null) {
+      entry.foodConsumed = new HashMap<>(foodConsumed);
+    }
 
     RideCountManager countManager = RideCountManager.getInstance();
     Map<RideName, Integer> allCounts = countManager.getAllRideCounts();

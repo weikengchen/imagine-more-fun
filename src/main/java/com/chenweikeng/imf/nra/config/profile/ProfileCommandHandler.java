@@ -1,6 +1,5 @@
 package com.chenweikeng.imf.nra.config.profile;
 
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
@@ -28,27 +27,13 @@ public final class ProfileCommandHandler {
     if (matchedProfile != null) {
       ProfileManager.activateProfile(matchedProfile.id);
       Component message =
-          Component.empty()
-              .withStyle(ChatFormatting.AQUA)
-              .append(
-                  Component.literal("[NRA] ")
-                      .withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.BOLD))
-              .append(Component.literal("Switched to profile: ").withStyle(ChatFormatting.WHITE))
-              .append(Component.literal(matchedProfile.name).withStyle(ChatFormatting.YELLOW));
+          Component.literal("§6✨ §e[IMF] §fSwitched to profile: §e" + matchedProfile.name);
       if (client.player != null) {
         client.player.displayClientMessage(message, false);
       }
       return 1;
     } else {
-      Component message =
-          Component.empty()
-              .withStyle(ChatFormatting.RED)
-              .append(
-                  Component.literal("[NRA] ")
-                      .withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD))
-              .append(
-                  Component.literal("Profile not found: " + profileName)
-                      .withStyle(ChatFormatting.WHITE));
+      Component message = Component.literal("§6✨ §e[IMF] §c⚠ Profile not found: §f" + profileName);
       if (client.player != null) {
         client.player.displayClientMessage(message, false);
       }

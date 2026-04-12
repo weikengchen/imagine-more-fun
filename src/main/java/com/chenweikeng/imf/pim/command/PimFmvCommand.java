@@ -72,7 +72,7 @@ public class PimFmvCommand {
                     () -> {
                       source.sendFeedback(
                           Component.literal(
-                              "§6✨ §e[Pim] §cError during calculation: " + e.getMessage()));
+                              "§6✨ §e[IMF] §cError during calculation: " + e.getMessage()));
                     });
           }
         });
@@ -85,7 +85,7 @@ public class PimFmvCommand {
         .execute(
             () -> {
               source.sendFeedback(
-                  Component.literal("§6✨ §e[Pim] §6FMV Values for Required Pin Series"));
+                  Component.literal("§6✨ §e[IMF] §6FMV Values for Required Pin Series"));
             });
 
     Map<String, PinCalculationUtils.FMVResult> allResults = new java.util.TreeMap<>();
@@ -126,7 +126,7 @@ public class PimFmvCommand {
               () -> {
                 source.sendFeedback(
                     Component.literal(
-                        "§6✨ §e[Pim] §cNo FMV values available. Please ensure you have pin series data."));
+                        "§6✨ §e[IMF] §cNo FMV values available. Please ensure you have pin series data."));
               });
       return;
     }
@@ -235,7 +235,7 @@ public class PimFmvCommand {
             () -> {
               MutableComponent message =
                   Component.literal(
-                      "§6✨ §e[Pim] §6Showing "
+                      "§6✨ §e[IMF] §6Showing "
                           + resultCount
                           + " Required pin series with FMV values ");
 

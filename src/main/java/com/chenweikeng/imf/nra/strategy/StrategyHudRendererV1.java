@@ -1,12 +1,12 @@
 package com.chenweikeng.imf.nra.strategy;
 
+import com.chenweikeng.imf.mixin.NraBossHealthOverlayAccessor;
 import com.chenweikeng.imf.nra.GameState;
 import com.chenweikeng.imf.nra.NotRidingAlertClient;
 import com.chenweikeng.imf.nra.Timing;
 import com.chenweikeng.imf.nra.config.ClosestRideMode;
 import com.chenweikeng.imf.nra.config.ModConfig;
 import com.chenweikeng.imf.nra.config.SortingRules;
-import com.chenweikeng.imf.mixin.NraBossHealthOverlayAccessor;
 import com.chenweikeng.imf.nra.ride.AutograbHolder;
 import com.chenweikeng.imf.nra.ride.ClosestRideHolder;
 import com.chenweikeng.imf.nra.ride.CurrentRideHolder;
@@ -108,7 +108,8 @@ public class StrategyHudRendererV1 {
       return;
     }
     BossHealthOverlay bossOverlay = client.gui.getBossOverlay();
-    Map<UUID, LerpingBossEvent> bossEvents = ((NraBossHealthOverlayAccessor) bossOverlay).getEvents();
+    Map<UUID, LerpingBossEvent> bossEvents =
+        ((NraBossHealthOverlayAccessor) bossOverlay).getEvents();
     if (bossEvents != null && !bossEvents.isEmpty()) {
       return;
     }

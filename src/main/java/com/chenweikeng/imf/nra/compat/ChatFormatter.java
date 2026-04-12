@@ -1,9 +1,9 @@
 package com.chenweikeng.imf.nra.compat;
 
+import com.chenweikeng.imf.nra.CursorManager;
 import com.chenweikeng.monkeycraft_api.v1.ChatMessageResult;
 import com.chenweikeng.monkeycraft_api.v1.IncomingChatContext;
 import com.chenweikeng.monkeycraft_api.v1.OutgoingChatContext;
-import com.chenweikeng.imf.nra.CursorManager;
 import com.vdurmont.emoji.EmojiManager;
 import java.util.HashMap;
 import java.util.Map;

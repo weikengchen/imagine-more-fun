@@ -25,7 +25,7 @@ public class PimResetCommand {
                       .getSource()
                       .sendFeedback(
                           Component.literal(
-                              "§6✨ §e[Pim] §fAll pin data has been reset successfully."));
+                              "§6✨ §e[IMF] §fAll pin data has been reset successfully."));
                   return 1;
                 }));
   }

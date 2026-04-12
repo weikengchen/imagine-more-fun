@@ -18,7 +18,6 @@ public class ServerState {
   public static void onJoin(Minecraft client) {
     if (client.getCurrentServer() == null || client.getCurrentServer().ip == null) {
       isImagineFunServer = false;
-      LOGGER.info("No server info available on join");
       return;
     }
 
@@ -26,15 +25,11 @@ public class ServerState {
     isImagineFunServer = serverIp.endsWith(".imaginefun.net");
 
     if (isImagineFunServer) {
-      LOGGER.info("Joined ImagineFun.net server: {}", serverIp);
       muteMusicVolume(client);
-    } else {
-      LOGGER.info("Joined non-ImagineFun.net server: {}", serverIp);
     }
   }
 
   public static void onDisconnect() {
-    LOGGER.info("Disconnected from server");
     restoreMusicVolume();
     isImagineFunServer = false;
   }
@@ -44,7 +39,6 @@ public class ServerState {
     if (current > 0f) {
       savedMusicVolume = current;
       client.options.getSoundSourceOptionInstance(SoundSource.MUSIC).set(0.0);
-      LOGGER.info("Muted background music (was {})", savedMusicVolume);
     }
   }
 
@@ -52,7 +46,6 @@ public class ServerState {
     if (savedMusicVolume >= 0f) {
       Minecraft client = Minecraft.getInstance();
       client.options.getSoundSourceOptionInstance(SoundSource.MUSIC).set((double) savedMusicVolume);
-      LOGGER.info("Restored background music volume to {}", savedMusicVolume);
       savedMusicVolume = -1f;
     }
   }

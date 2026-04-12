@@ -2,7 +2,6 @@ package com.chenweikeng.imf.nra.handler;
 
 import com.chenweikeng.imf.nra.ServerState;
 import com.chenweikeng.imf.nra.wizard.TutorialManager;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -47,24 +46,15 @@ public class ConfigReminderHandler {
     }
 
     Component message =
-        Component.empty()
-            .withStyle(ChatFormatting.AQUA)
+        Component.literal(
+                "§6✨ §e[IMF] §fThis mod modifies your gameplay experience significantly. To set up the mod, please run ")
             .append(
-                Component.literal("[NRA] ")
-                    .withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.BOLD))
-            .append(
-                Component.literal(
-                        "This mod modifies your gameplay experience significantly. To set up the mod, please run ")
-                    .withStyle(ChatFormatting.WHITE))
-            .append(
-                Component.literal("/nra setup")
+                Component.literal("§b/nra setup")
                     .withStyle(
                         s ->
-                            s.withColor(ChatFormatting.AQUA)
-                                .withUnderlined(true)
+                            s.withUnderlined(true)
                                 .withClickEvent(new ClickEvent.RunCommand("nra setup"))))
-            .append(
-                Component.literal(" to open the setup wizard.").withStyle(ChatFormatting.WHITE));
+            .append(Component.literal("§f to open the setup wizard."));
 
     client.player.displayClientMessage(message, false);
   }

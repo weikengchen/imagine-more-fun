@@ -11,6 +11,8 @@ import com.chenweikeng.imf.nra.ride.LastRideHolder;
 import com.chenweikeng.imf.nra.ride.RideCountManager;
 import com.chenweikeng.imf.nra.ride.RideName;
 import com.chenweikeng.imf.nra.session.SessionTracker;
+import com.chenweikeng.imf.pim.PimClient;
+import com.chenweikeng.imf.pim.hoarder.PinHoarderHelper;
 import java.awt.Color;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -89,6 +91,13 @@ public class NraChatListenerMixin {
       if (sessionUrl != null) {
         CompletableFuture.runAsync(() -> OpenAudioMcService.getInstance().connect(sessionUrl));
       }
+    }
+
+    // Detect Pin Hoarder trade completion (coin pickup message)
+    // Format: " + (8x Common) Kingdom Coin" or similar
+    if (PimClient.isImagineFunServer() && msg.startsWith(" + (") && msg.contains("Kingdom Coin")) {
+      SessionTracker.getInstance().onPinHoarderTrade();
+      PinHoarderHelper.onTradeCompleted();
     }
 
     if (!msg.contains(RIDE_OVERVIEW_MARKER) && !msg.contains(ATTRACTION_OVERVIEW_MARKER)) return;

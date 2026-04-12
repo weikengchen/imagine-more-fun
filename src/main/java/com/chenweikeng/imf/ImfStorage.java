@@ -13,8 +13,7 @@ import net.fabricmc.loader.api.FabricLoader;
  * than hard-coding.
  *
  * <p>SkinCache continues to use {@code <gameDir>/skincache/} (separate tree under the game
- * directory, not the config directory) and is not routed through this class. PIM has no disk
- * state.
+ * directory, not the config directory) and is not routed through this class. PIM has no disk state.
  */
 public final class ImfStorage {
 
@@ -68,7 +67,9 @@ public final class ImfStorage {
     return root().resolve("native");
   }
 
-  /** Marker file written once migration from the old {@code config/not-riding-alert*} paths has run. */
+  /**
+   * Marker file written once migration from the old {@code config/not-riding-alert*} paths has run.
+   */
   public static Path migrationMarker() {
     return root().resolve(".migrated-v1");
   }

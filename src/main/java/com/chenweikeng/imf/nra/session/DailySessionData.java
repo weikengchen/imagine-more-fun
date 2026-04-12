@@ -12,6 +12,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DailySessionData {
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -26,6 +28,14 @@ public class DailySessionData {
   public int currentStreak;
   public String lastActiveDate;
 
+  // Pin activity tracking
+  public int pinHoarderTrades;
+  public int pinBoxesOpened;
+  public int newMintPinsAdded;
+
+  // Food consumption tracking
+  public Map<String, Integer> foodConsumed = new HashMap<>();
+
   private transient boolean dirty = false;
   private transient long lastSaveTime = 0;
   private transient long currentSessionStartMs = 0;
@@ -37,6 +47,9 @@ public class DailySessionData {
     this.totalOnlineSeconds = 0;
     this.currentStreak = 0;
     this.lastActiveDate = null;
+    this.pinHoarderTrades = 0;
+    this.pinBoxesOpened = 0;
+    this.newMintPinsAdded = 0;
   }
 
   public void startSession() {
@@ -73,9 +86,21 @@ public class DailySessionData {
     String previousDate = date;
 
     // Snapshot the day's ride counts before resetting
-    if (ridesCompleted > 0) {
+    if (ridesCompleted > 0
+        || pinHoarderTrades > 0
+        || pinBoxesOpened > 0
+        || newMintPinsAdded > 0
+        || !foodConsumed.isEmpty()) {
       DailyRideSnapshot.getInstance()
-          .snapshotDay(previousDate, ridesCompleted, totalRideTimeSeconds, totalOnlineSeconds);
+          .snapshotDay(
+              previousDate,
+              ridesCompleted,
+              totalRideTimeSeconds,
+              totalOnlineSeconds,
+              pinHoarderTrades,
+              pinBoxesOpened,
+              newMintPinsAdded,
+              foodConsumed);
       RideReportNotifier.getInstance().onDateRollover(previousDate);
     }
 
@@ -84,6 +109,10 @@ public class DailySessionData {
     ridesCompleted = 0;
     totalRideTimeSeconds = 0;
     totalOnlineSeconds = 0;
+    pinHoarderTrades = 0;
+    pinBoxesOpened = 0;
+    newMintPinsAdded = 0;
+    foodConsumed.clear();
     dirty = true;
 
     if (wasInSession) {
@@ -121,6 +150,30 @@ public class DailySessionData {
       lastActiveDate = todayStr;
     }
     dirty = true;
+  }
+
+  public void onPinHoarderTrade() {
+    pinHoarderTrades++;
+    dirty = true;
+  }
+
+  public void onPinBoxOpened() {
+    pinBoxesOpened++;
+    dirty = true;
+  }
+
+  public void onNewMintPinAdded() {
+    newMintPinsAdded++;
+    dirty = true;
+  }
+
+  public void onFoodConsumed(String itemName) {
+    foodConsumed.put(itemName, foodConsumed.getOrDefault(itemName, 0) + 1);
+    dirty = true;
+  }
+
+  public Map<String, Integer> getFoodConsumed() {
+    return new HashMap<>(foodConsumed);
   }
 
   public void markDirty() {

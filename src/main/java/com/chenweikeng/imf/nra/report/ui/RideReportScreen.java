@@ -521,6 +521,99 @@ public class RideReportScreen extends Screen {
       y += LINE_HEIGHT;
     }
 
+    // Pin Activity section
+    if (report.pinHoarderTrades > 0 || report.pinBoxesOpened > 0 || report.newMintPinsAdded > 0) {
+      y += 4;
+      graphics.fill(contentX, y, contentX + contentWidth, y + 1, SEPARATOR_COLOR);
+      y += 6;
+
+      graphics.drawString(
+          font,
+          Component.literal("Pin Activity").withStyle(ChatFormatting.BOLD).withColor(0xFFFF69B4),
+          contentX,
+          y,
+          TEXT_COLOR,
+          false);
+      y += LINE_HEIGHT + 2;
+
+      if (report.pinHoarderTrades > 0) {
+        graphics.drawString(
+            font,
+            Component.empty()
+                .append(Component.literal("Pin Hoarder Trades: ").withColor(DIM_COLOR))
+                .append(
+                    Component.literal(String.valueOf(report.pinHoarderTrades))
+                        .withColor(ACCENT_COLOR)),
+            contentX,
+            y,
+            TEXT_COLOR,
+            false);
+        y += LINE_HEIGHT;
+      }
+
+      if (report.pinBoxesOpened > 0) {
+        graphics.drawString(
+            font,
+            Component.empty()
+                .append(Component.literal("Pin Packs Opened: ").withColor(DIM_COLOR))
+                .append(
+                    Component.literal(String.valueOf(report.pinBoxesOpened))
+                        .withColor(ACCENT_COLOR)),
+            contentX,
+            y,
+            TEXT_COLOR,
+            false);
+        y += LINE_HEIGHT;
+      }
+
+      if (report.newMintPinsAdded > 0) {
+        graphics.drawString(
+            font,
+            Component.empty()
+                .append(Component.literal("New Mints Added: ").withColor(DIM_COLOR))
+                .append(
+                    Component.literal(String.valueOf(report.newMintPinsAdded))
+                        .withStyle(ChatFormatting.BOLD)
+                        .withColor(MILESTONE_COLOR)),
+            contentX,
+            y,
+            TEXT_COLOR,
+            false);
+        y += LINE_HEIGHT;
+      }
+    }
+
+    // Food Consumption section
+    if (report.foodConsumed != null && !report.foodConsumed.isEmpty()) {
+      y += 4;
+      graphics.fill(contentX, y, contentX + contentWidth, y + 1, SEPARATOR_COLOR);
+      y += 6;
+
+      graphics.drawString(
+          font,
+          Component.literal("Food Consumed").withStyle(ChatFormatting.BOLD).withColor(0xFF8BC34A),
+          contentX,
+          y,
+          TEXT_COLOR,
+          false);
+      y += LINE_HEIGHT + 2;
+
+      for (java.util.Map.Entry<String, Integer> entry : report.foodConsumed.entrySet()) {
+        String itemName = entry.getKey();
+        int count = entry.getValue();
+        graphics.drawString(
+            font,
+            Component.empty()
+                .append(Component.literal("  " + itemName + ": ").withColor(DIM_COLOR))
+                .append(Component.literal(String.valueOf(count)).withColor(ACCENT_COLOR)),
+            contentX,
+            y,
+            TEXT_COLOR,
+            false);
+        y += LINE_HEIGHT;
+      }
+    }
+
     y += PANEL_PADDING;
 
     graphics.disableScissor();
@@ -653,10 +746,9 @@ public class RideReportScreen extends Screen {
                   if (client.player != null) {
                     client.player.displayClientMessage(
                         Component.literal(
-                                copied
-                                    ? "Report copied! Paste in Discord to share."
-                                    : "Failed to copy to clipboard.")
-                            .withColor(copied ? ACCENT_COLOR : 0xFFFF5555),
+                            copied
+                                ? "§6✨ §e[IMF] §a✓ Report copied! Paste in Discord to share."
+                                : "§6✨ §e[IMF] §c⚠ Failed to copy to clipboard."),
                         false);
                   }
                 });

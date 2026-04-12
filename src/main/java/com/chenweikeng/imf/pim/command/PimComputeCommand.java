@@ -67,7 +67,7 @@ public class PimComputeCommand {
                     () -> {
                       source.sendFeedback(
                           Component.literal(
-                              "§6✨ §e[Pim] §cError during calculation: " + e.getMessage()));
+                              "§6✨ §e[IMF] §cError during calculation: " + e.getMessage()));
                     });
           }
         });
@@ -83,7 +83,7 @@ public class PimComputeCommand {
               () -> {
                 source.sendFeedback(
                     Component.literal(
-                        "§6✨ §e[Pim] §cNo pin series data available. Please open /pinrarity and /pinbook first."));
+                        "§6✨ §e[IMF] §cNo pin series data available. Please open /pinrarity and /pinbook first."));
               });
       return;
     }
@@ -124,7 +124,7 @@ public class PimComputeCommand {
                   () -> {
                     source.sendFeedback(
                         Component.literal(
-                            "§6✨ §e[Pim] §cError calculating "
+                            "§6✨ §e[IMF] §cError calculating "
                                 + finalSeriesName
                                 + ": "
                                 + (result != null ? result.error.get() : "Unknown error")));
@@ -157,7 +157,7 @@ public class PimComputeCommand {
                     if (finalPriceStr != null) {
                       source.sendFeedback(
                           Component.literal(
-                              "§6✨ §e[Pim] §a"
+                              "§6✨ §e[IMF] §a"
                                   + finalSeriesName
                                   + ": §f"
                                   + String.format("%.0f", finalBoxes)
@@ -167,7 +167,7 @@ public class PimComputeCommand {
                     } else {
                       source.sendFeedback(
                           Component.literal(
-                              "§6✨ §e[Pim] §a"
+                              "§6✨ §e[IMF] §a"
                                   + finalSeriesName
                                   + ": §f"
                                   + String.format("%.0f", finalBoxes)
@@ -176,7 +176,7 @@ public class PimComputeCommand {
                   } else if (result.isError()) {
                     source.sendFeedback(
                         Component.literal(
-                            "§6✨ §e[Pim] §cError calculating "
+                            "§6✨ §e[IMF] §cError calculating "
                                 + finalSeriesName
                                 + ": "
                                 + result.error.get()));
@@ -197,7 +197,7 @@ public class PimComputeCommand {
                 () -> {
                   source.sendFeedback(
                       Component.literal(
-                          "§6✨ §e[Pim] §cError processing "
+                          "§6✨ §e[IMF] §cError processing "
                               + finalSeriesName
                               + ": "
                               + e.getMessage()));
@@ -216,7 +216,7 @@ public class PimComputeCommand {
             () -> {
               source.sendFeedback(
                   Component.literal(
-                      "§6✨ §e[Pim] §6Total: §f"
+                      "§6✨ §e[IMF] §6Total: §f"
                           + totalBoxesStr
                           + " boxes"
                           + (finalTotalPrice > 0 ? " (≈" + totalPriceStr + ")" : "")));

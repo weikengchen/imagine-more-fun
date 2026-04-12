@@ -9,21 +9,14 @@ import com.chenweikeng.imf.nra.ride.AutograbHolder;
 import com.chenweikeng.imf.nra.ride.CurrentRideHolder;
 import com.chenweikeng.imf.nra.ride.RideName;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 public class CursorManager {
   public static final Component DYNAMIC_FPS_COMPATIBILITY_MESSAGE =
-      Component.empty()
-          .withStyle(ChatFormatting.AQUA)
-          .append(
-              Component.literal("[NRA] ").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.BOLD))
-          .append(
-              Component.literal(
-                      "For compatibility with Dynamic FPS, the window will not be minimized when MonkeyCraft client is connected.")
-                  .withStyle(ChatFormatting.WHITE));
+      Component.literal(
+          "§6✨ §e[IMF] §fFor compatibility with Dynamic FPS, the window will not be minimized when MonkeyCraft client is connected.");
 
   private boolean wasRiding = false;
   private boolean wasOnVehicle = false;
@@ -249,16 +242,7 @@ public class CursorManager {
     lastCanoeMessageTick = state.getAbsoluteTickCounter();
 
     Component message =
-        Component.empty()
-            .withStyle(ChatFormatting.AQUA)
-            .append(
-                Component.literal("[NRA] ")
-                    .withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.BOLD))
-            .append(Component.literal("Please use ").withStyle(ChatFormatting.WHITE))
-            .append(
-                Component.literal("LEFT click")
-                    .withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
-            .append(Component.literal(" to ride canoes.").withStyle(ChatFormatting.WHITE));
+        Component.literal("§6✨ §e[IMF] §fPlease use §e§lLEFT click§r§f to ride canoes.");
 
     client.player.displayClientMessage(message, false);
   }

@@ -1,19 +1,26 @@
 package com.chenweikeng.imf.pim.command;
 
+import com.chenweikeng.imf.pim.PimClient;
+import com.chenweikeng.imf.pim.ui.PimScreen;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.minecraft.client.Minecraft;
 
 public class PimCommand {
 
   public static void registerCommands() {
     ClientCommandRegistrationCallback.EVENT.register(
         (dispatcher, registryAccess) -> {
-          // Register all sub-commands
-          PimTradeCommand.register(dispatcher);
-          PimResetCommand.register(dispatcher);
-          PimComputeCommand.register(dispatcher);
-          PimExportCommand.register(dispatcher);
-          PimValueCommand.register(dispatcher);
-          PimFmvCommand.register(dispatcher);
+          // Register main /pim command that opens GUI
+          dispatcher.register(
+              ClientCommandManager.literal("pim")
+                  .requires(src -> PimClient.isImagineFunServer())
+                  .executes(
+                      context -> {
+                        Minecraft client = Minecraft.getInstance();
+                        client.execute(() -> client.setScreen(new PimScreen(client.screen)));
+                        return 1;
+                      }));
         });
   }
 }
