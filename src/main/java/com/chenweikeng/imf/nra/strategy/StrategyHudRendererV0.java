@@ -360,20 +360,22 @@ public class StrategyHudRendererV0 {
 
   private static String formatGoalText(
       FormattedRide formattedRide, RideGoal goal, SortingRules sortingRules) {
+    int ridesNeeded;
+    long timeNeeded;
     if (sortingRules == SortingRules.TOTAL_TIME_ASC
         || sortingRules == SortingRules.TOTAL_TIME_DESC) {
-      return String.format(
-          "%s - %d more, %s",
-          formattedRide.getName(),
-          goal.getMaxRidesNeeded(),
-          TimeFormatUtil.formatDuration(goal.getMaxTimeNeeded()));
+      ridesNeeded = goal.getMaxRidesNeeded();
+      timeNeeded = goal.getMaxTimeNeeded();
     } else {
-      return String.format(
-          "%s - %d more, %s",
-          formattedRide.getName(),
-          goal.getNextGoalRidesNeeded(),
-          TimeFormatUtil.formatDuration(goal.getNextGoalTimeNeeded()));
+      ridesNeeded = goal.getNextGoalRidesNeeded();
+      timeNeeded = goal.getNextGoalTimeNeeded();
     }
+    if (formattedRide.getStatus() == RideStatus.CLOSEST && ridesNeeded == 0) {
+      return formattedRide.getName();
+    }
+    return String.format(
+        "%s - %d more, %s",
+        formattedRide.getName(), ridesNeeded, TimeFormatUtil.formatDuration(timeNeeded));
   }
 
   private static LayoutDecision decideLayout(

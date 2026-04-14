@@ -142,22 +142,31 @@ public class StrategyHudRendererV2 {
     if (displayCount > 0) {
       for (RideGoal goal : topGoals) {
         String name = goal.getRide().getShortName().toUpperCase();
-        if (ModConfig.currentSetting.sortingRules == SortingRules.TOTAL_TIME_ASC
-            || ModConfig.currentSetting.sortingRules == SortingRules.TOTAL_TIME_DESC) {
-          String rides = goal.getMaxRidesNeeded() + "+";
-          String time = TimeFormatUtil.formatDuration(goal.getMaxTimeNeeded());
-          entries.add(new EntryComponents(name, rides, time));
-        } else {
-          String rides = goal.getNextGoalRidesNeeded() + "+";
-          String time = TimeFormatUtil.formatDuration(goal.getNextGoalTimeNeeded());
-          entries.add(new EntryComponents(name, rides, time));
-        }
-
         boolean isClosest =
             currentRide == null
                 && autograbRide == null
                 && closestRide != null
                 && goal.getRide() == closestRide;
+
+        int ridesNeeded;
+        long timeNeeded;
+        if (ModConfig.currentSetting.sortingRules == SortingRules.TOTAL_TIME_ASC
+            || ModConfig.currentSetting.sortingRules == SortingRules.TOTAL_TIME_DESC) {
+          ridesNeeded = goal.getMaxRidesNeeded();
+          timeNeeded = goal.getMaxTimeNeeded();
+        } else {
+          ridesNeeded = goal.getNextGoalRidesNeeded();
+          timeNeeded = goal.getNextGoalTimeNeeded();
+        }
+
+        if (isClosest && ridesNeeded == 0) {
+          entries.add(new EntryComponents(name, "", ""));
+        } else {
+          entries.add(
+              new EntryComponents(
+                  name, ridesNeeded + "+", TimeFormatUtil.formatDuration(timeNeeded)));
+        }
+
         if (isClosest) {
           closestRideInList = true;
           entryColors.add(colorClosest);
@@ -176,17 +185,26 @@ public class StrategyHudRendererV2 {
         String rides;
         String time;
         if (closestGoal != null) {
+          int ridesNeeded;
+          long timeNeeded;
           if (ModConfig.currentSetting.sortingRules == SortingRules.TOTAL_TIME_ASC
               || ModConfig.currentSetting.sortingRules == SortingRules.TOTAL_TIME_DESC) {
-            rides = closestGoal.getMaxRidesNeeded() + "+";
-            time = TimeFormatUtil.formatDuration(closestGoal.getMaxTimeNeeded());
+            ridesNeeded = closestGoal.getMaxRidesNeeded();
+            timeNeeded = closestGoal.getMaxTimeNeeded();
           } else {
-            rides = closestGoal.getNextGoalRidesNeeded() + "+";
-            time = TimeFormatUtil.formatDuration(closestGoal.getNextGoalTimeNeeded());
+            ridesNeeded = closestGoal.getNextGoalRidesNeeded();
+            timeNeeded = closestGoal.getNextGoalTimeNeeded();
+          }
+          if (ridesNeeded == 0) {
+            rides = "";
+            time = "";
+          } else {
+            rides = ridesNeeded + "+";
+            time = TimeFormatUtil.formatDuration(timeNeeded);
           }
         } else {
-          rides = "?";
-          time = "?";
+          rides = "";
+          time = "";
         }
         entries.set(entries.size() - 1, new EntryComponents(name, rides, time));
         entryColors.set(entryColors.size() - 1, colorClosest);
