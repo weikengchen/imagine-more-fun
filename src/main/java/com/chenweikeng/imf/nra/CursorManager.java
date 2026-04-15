@@ -32,6 +32,7 @@ public class CursorManager {
   public void tick(Minecraft client, boolean isPassenger, boolean isRiding, RideName autograbRide) {
     GameState state = GameState.getInstance();
     CursorReleaseTiming timing = ModConfig.currentSetting.cursorReleaseTiming;
+    windowMinimizeHandler.tickMonitor();
 
     if (timing == CursorReleaseTiming.ON_ZONE_ENTRY && autograbRide != null && !isPassenger) {
       if (autograbRide != previousAutograbRide) {
