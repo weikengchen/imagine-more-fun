@@ -17,13 +17,38 @@ NATIVE_CACHE_DIR="/Users/cusgadmin/Library/Application Support/ModrinthApp/profi
 # cached binaries behind.
 LEGACY_NATIVE_CACHE_DIR="/Users/cusgadmin/Library/Application Support/ModrinthApp/profiles/ImagineFun/config/not-riding-alert/native"
 
-# Rebuild native WebView helper binary (must happen before gradlew build so the JAR includes it).
-# Only the macOS helper is rebuilt here; Windows is cross-compiled via the standalone build-all.sh.
+# Rebuild native helper binaries (must happen before gradlew build so the JAR includes them).
+# macOS helpers are built here; Windows is best-effort (skipped if dotnet is missing) — the
+# standalone native/build-all.sh remains the source of truth for CI Windows builds.
 echo "Rebuilding macOS native WebView helper..."
 swiftc -O \
     -o "${PROJECT_DIR}/src/main/resources/native/macos/webview-helper" \
     "${PROJECT_DIR}/native/macos/WebViewHelper.swift" \
     -framework WebKit -framework AppKit
+
+echo "Rebuilding macOS native Status helper..."
+swiftc -O \
+    -o "${PROJECT_DIR}/src/main/resources/native/macos/status-helper" \
+    "${PROJECT_DIR}/native/macos/StatusHelper.swift" \
+    -framework AppKit
+
+if command -v dotnet &>/dev/null; then
+    echo "Rebuilding Windows native Status helper (dotnet cross-compile)..."
+    (
+        cd "${PROJECT_DIR}/native/windows/status"
+        dotnet publish StatusHelper.csproj -c Release -r win-x64 --no-self-contained \
+            -p:PublishSingleFile=true -o publish 2>&1 | grep -v "warning MSB3277" || true
+    )
+    STATUS_EXE="${PROJECT_DIR}/native/windows/status/publish/status-helper.exe"
+    if [ -f "${STATUS_EXE}" ]; then
+        cp "${STATUS_EXE}" "${PROJECT_DIR}/src/main/resources/native/windows/status-helper.exe"
+        echo "Copied status-helper.exe into resources."
+    else
+        echo "WARNING: status-helper.exe not produced; skipping."
+    fi
+else
+    echo "dotnet not found; skipping Windows Status helper build."
+fi
 
 echo "Building ImagineMoreFun mod..."
 cd "${PROJECT_DIR}"

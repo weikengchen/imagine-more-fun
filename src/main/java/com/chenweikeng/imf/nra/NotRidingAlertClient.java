@@ -28,6 +28,7 @@ import com.chenweikeng.imf.nra.ride.RideCountManager;
 import com.chenweikeng.imf.nra.ride.RideName;
 import com.chenweikeng.imf.nra.session.SessionStatsHudRenderer;
 import com.chenweikeng.imf.nra.session.SessionTracker;
+import com.chenweikeng.imf.nra.status.StatusBarController;
 import com.chenweikeng.imf.nra.strategy.StrategyHudRendererDispatcher;
 import com.chenweikeng.imf.nra.tracker.FoodConsumptionTracker;
 import com.chenweikeng.imf.nra.tracker.PlayerMovementTracker;
@@ -104,6 +105,7 @@ public class NotRidingAlertClient implements ClientModInitializer {
         (handler, client) -> {
           SessionTracker.getInstance().onSessionEnd();
           OpenAudioMcService.getInstance().disconnect();
+          StatusBarController.getInstance().onDisconnect();
           ServerState.onDisconnect();
           resetAllTrackers();
         });
@@ -192,6 +194,7 @@ public class NotRidingAlertClient implements ClientModInitializer {
     SessionTracker.getInstance().checkAndSaveIfNeeded();
     RideReportNotifier.getInstance().tick();
     FoodConsumptionTracker.getInstance().tick();
+    StatusBarController.getInstance().tick(client);
 
     tickCounter++;
     if (tickCounter >= Timing.ALERT_CHECK_INTERVAL) {

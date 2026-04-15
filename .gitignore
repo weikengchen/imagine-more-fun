@@ -35,3 +35,6 @@ replay_*.log
 # native helper build artifacts (.NET intermediate outputs)
 native/windows/obj/
 native/windows/bin/
+native/windows/status/obj/
+native/windows/status/bin/
+native/windows/status/publish/
