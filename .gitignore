@@ -35,6 +35,24 @@ replay_*.log
 # native helper build artifacts (.NET intermediate outputs)
 native/windows/obj/
 native/windows/bin/
+native/windows/publish/
 native/windows/status/obj/
 native/windows/status/bin/
 native/windows/status/publish/
+
+# Compiled native helpers — built fresh by CI (and by build-and-deploy.sh
+# locally) and copied into src/main/resources/native/ before the gradle
+# build. Keeping them out of git avoids stale binaries in commits.
+native/macos/webview-helper
+native/macos/status-helper
+src/main/resources/native/macos/webview-helper
+src/main/resources/native/macos/status-helper
+src/main/resources/native/windows/webview-helper.exe
+src/main/resources/native/windows/status-helper.exe
+src/main/resources/native/windows/WebView2Loader.dll
+
+# Stray Windows helpers that get dropped at native/windows/ root by some
+# manual build flows (canonical location is native/windows/publish/).
+native/windows/webview-helper.exe
+native/windows/WebView2Loader.dll
+native/windows/status-helper.exe
