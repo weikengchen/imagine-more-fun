@@ -6,7 +6,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="${SCRIPT_DIR}"
 TARGET_DIR="/Users/cusgadmin/Library/Application Support/ModrinthApp/profiles/ImagineFun/mods/"
 
-JAR_NAME="imaginemorefun-3.0.0.jar"
+# Derive the jar name from gradle.properties so a mod_version bump
+# doesn't silently leave us deploying a stale jar.
+MOD_VERSION=$(grep '^mod_version=' "${PROJECT_DIR}/gradle.properties" | cut -d= -f2 | tr -d '[:space:]')
+if [ -z "${MOD_VERSION}" ]; then
+    echo "Error: could not read mod_version from ${PROJECT_DIR}/gradle.properties"
+    exit 1
+fi
+JAR_NAME="imaginemorefun-${MOD_VERSION}.jar"
 SOURCE_JAR="${PROJECT_DIR}/build/libs/${JAR_NAME}"
 TARGET_JAR="${TARGET_DIR}/${JAR_NAME}"
 
@@ -76,12 +83,15 @@ mkdir -p "${TARGET_DIR}"
 # cause mixins and entrypoints to run twice.
 remove_old_jar() {
     local pattern="$1"
-    local found
-    found=$(find "${TARGET_DIR}" -maxdepth 1 -type f -name "${pattern}" 2>/dev/null || true)
-    if [ -n "${found}" ]; then
+    # NUL-separate find output so paths with spaces (TARGET_DIR contains
+    # "Application Support") survive the round-trip — the previous
+    # `xargs rm -f` silently failed because xargs split on whitespace.
+    local found_count
+    found_count=$(find "${TARGET_DIR}" -maxdepth 1 -type f -name "${pattern}" 2>/dev/null | wc -l | tr -d '[:space:]')
+    if [ "${found_count}" != "0" ]; then
         echo "Removing superseded jar(s) matching ${pattern}:"
-        echo "${found}" | sed 's/^/  - /'
-        echo "${found}" | xargs rm -f
+        find "${TARGET_DIR}" -maxdepth 1 -type f -name "${pattern}" -print 2>/dev/null | sed 's|^|  - |'
+        find "${TARGET_DIR}" -maxdepth 1 -type f -name "${pattern}" -delete 2>/dev/null
     fi
 }
 
@@ -89,6 +99,11 @@ remove_old_jar "not-riding-alert-*.jar"
 remove_old_jar "pim-*.jar"
 remove_old_jar "pim2-*.jar"
 remove_old_jar "skin-cache-mod-*.jar"
+
+# Wipe any prior imaginemorefun-*.jar (including -sources jars) so a previous
+# mod_version doesn't sit alongside the new one — Fabric refuses to start with
+# duplicate mod IDs, and -sources jars don't belong in mods/ at all.
+remove_old_jar "imaginemorefun-*.jar"
 
 verify_jar() {
     local jar_file="$1"
