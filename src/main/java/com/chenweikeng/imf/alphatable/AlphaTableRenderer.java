@@ -30,6 +30,7 @@ public final class AlphaTableRenderer {
   private static final int LINK_GAP = 12;
   private static final int LINK_SEPARATOR_HEIGHT = 4;
   private static final int VIEWPORT_MARGIN = 2;
+  private static final int RIGHT_EDGE_MARGIN = 10;
   private static final int BACKGROUND_COLOR = 0xC0000000; // ~75% opaque black
   private static final int BORDER_COLOR = 0xFF303030;
   private static final int TEXT_COLOR = 0xFFFFFFFF;
@@ -169,19 +170,13 @@ public final class AlphaTableRenderer {
     int tableWidth = contentWidth + PADDING * 2;
     int tableHeight = gridHeight + LINK_SEPARATOR_HEIGHT + linkRowHeight + PADDING * 2;
 
-    // Center horizontally within the gutter to the right of the open container.
-    int gutterCenterX = (containerRight + screenWidth) / 2;
-    int x = gutterCenterX - tableWidth / 2;
+    // Anchor against the right edge of the screen (with a margin) so popup messages
+    // that appear in the center of the gutter don't cover the table.
+    int x = screenWidth - tableWidth - RIGHT_EDGE_MARGIN;
     // Clamp so we never spill off the viewport or overlap the container.
     int minX = containerRight + VIEWPORT_MARGIN;
-    int maxX = screenWidth - tableWidth - VIEWPORT_MARGIN;
-    if (maxX < minX) {
-      maxX = minX;
-    }
     if (x < minX) {
       x = minX;
-    } else if (x > maxX) {
-      x = maxX;
     }
     int y = (screenHeight - tableHeight) / 2;
 
