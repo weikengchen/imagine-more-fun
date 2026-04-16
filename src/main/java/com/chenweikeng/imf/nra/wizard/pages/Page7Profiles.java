@@ -48,7 +48,7 @@ public class Page7Profiles extends WizardPage {
             literal(
                 "If you want to configure hotkeys for switching profiles, direct its hotkey to "));
     hotkeyContent =
-        append(hotkeyContent, colored("/nra profile [profile name]", ChatFormatting.YELLOW));
+        append(hotkeyContent, colored("/imf profile [profile name]", ChatFormatting.YELLOW));
     blocks.add(text(hotkeyContent));
     blocks.add(spacer(5));
 
@@ -63,7 +63,7 @@ public class Page7Profiles extends WizardPage {
   private Component editCurrentSettingSection() {
     Component content = literal("");
     content = append(content, literal("To edit the current configuration, enter "));
-    content = append(content, link("/nra", "command:nra"));
+    content = append(content, link("/imf", "command:imf"));
     content = append(content, literal("\n"));
     content = append(content, colored("  • Edit", ChatFormatting.GREEN));
     content = append(content, literal(" - Modify the current settings\n"));

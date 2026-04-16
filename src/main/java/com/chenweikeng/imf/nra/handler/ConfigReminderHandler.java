@@ -49,11 +49,11 @@ public class ConfigReminderHandler {
         Component.literal(
                 "§6✨ §e[IMF] §fThis mod modifies your gameplay experience significantly. To set up the mod, please run ")
             .append(
-                Component.literal("§b/nra setup")
+                Component.literal("§b/imf setup")
                     .withStyle(
                         s ->
                             s.withUnderlined(true)
-                                .withClickEvent(new ClickEvent.RunCommand("nra setup"))))
+                                .withClickEvent(new ClickEvent.RunCommand("imf setup"))))
             .append(Component.literal("§f to open the setup wizard."));
 
     client.player.displayClientMessage(message, false);

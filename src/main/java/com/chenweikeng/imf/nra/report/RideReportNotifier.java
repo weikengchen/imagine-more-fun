@@ -93,7 +93,7 @@ public class RideReportNotifier {
                     .withStyle(
                         Style.EMPTY
                             .withUnderlined(true)
-                            .withClickEvent(new ClickEvent.RunCommand("/nra ridereport"))
+                            .withClickEvent(new ClickEvent.RunCommand("/ridereport"))
                             .withHoverEvent(
                                 new HoverEvent.ShowText(
                                     Component.literal("View yesterday's ride report")))));

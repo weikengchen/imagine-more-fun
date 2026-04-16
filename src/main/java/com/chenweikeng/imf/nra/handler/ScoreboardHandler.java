@@ -122,11 +122,11 @@ public class ScoreboardHandler {
                 Component.literal(
                     "§f to receive scoreboard from server. You can hide scoreboard in "))
             .append(
-                Component.literal("§b/nra")
+                Component.literal("§b/imf")
                     .withStyle(
                         s ->
                             s.withUnderlined(true)
-                                .withClickEvent(new ClickEvent.RunCommand("nra"))))
+                                .withClickEvent(new ClickEvent.RunCommand("imf"))))
             .append(Component.literal("§f later if you want."));
 
     client.player.displayClientMessage(message, false);
