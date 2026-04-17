@@ -251,58 +251,70 @@ public class PimScreen extends Screen {
       tabY += TAB_HEIGHT + TAB_GAP;
     }
 
-    // Check for action button clicks in content area (for Export tab copy button)
-    if (selectedTab == Tab.EXPORT && clipboardText != null) {
-      int contentX = PADDING + SIDEBAR_WIDTH + PADDING;
-      int contentWidth = width - contentX - PADDING;
-      int buttonY = height - FOOTER_HEIGHT - 35;
-      int buttonWidth = 120;
-      int buttonX = contentX + (contentWidth - buttonWidth) / 2;
+    // Action lines like "[Click to Copy]", "[Click to Reset]", and
+    // "[Click to Enable/Disable]" are rendered as part of the scrolling
+    // content. The pre-existing Reset/Trade handlers tested fixed invisible
+    // regions (no button was ever drawn there) and didn't honor scrollOffset,
+    // so clicking the visible text did nothing while empty space elsewhere
+    // could trigger the action — for the Reset tab that meant an accidental,
+    // irreversible data wipe. Route everything through clickedActionLine().
 
-      if (mouseX >= buttonX
-          && mouseX < buttonX + buttonWidth
-          && mouseY >= buttonY
-          && mouseY < buttonY + 20) {
-        Minecraft.getInstance().keyboardHandler.setClipboard(clipboardText);
+    if (clipboardText != null && clickedActionLine("[Click to Copy", mouseX, mouseY)) {
+      Minecraft.getInstance().keyboardHandler.setClipboard(clipboardText);
+      // Avoid appending "Copied to clipboard!" repeatedly when the user
+      // clicks several times — keep the feedback to one row instead of
+      // growing contentLines (and maxScroll) unboundedly.
+      String tail =
+          contentLines.isEmpty() ? "" : contentLines.get(contentLines.size() - 1).text.getString();
+      if (!"Copied to clipboard!".equals(tail)) {
         contentLines.add(new ContentLine("Copied to clipboard!", 0x00FF00));
+      }
+      return true;
+    }
+
+    if (selectedTab == Tab.RESET && clickedActionLine("[Click to Reset", mouseX, mouseY)) {
+      performReset();
+      return true;
+    }
+
+    if (selectedTab == Tab.TRADE && clickedActionLine("[Click to ", mouseX, mouseY)) {
+      toggleTrade();
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Returns true if the click landed on the visible portion of any contentLines entry whose text
+   * starts with {@code prefix}. Computes each line's on-screen y from its index and {@code
+   * scrollOffset}, then clamps the hit rectangle to the scissor region used by {@link
+   * #renderContent} so clicks in scissor-hidden header/footer bands don't fire.
+   */
+  private boolean clickedActionLine(String prefix, double mouseX, double mouseY) {
+    int contentX = PADDING + SIDEBAR_WIDTH + PADDING;
+    int contentY = PADDING + HEADER_HEIGHT;
+    int contentHeight = height - FOOTER_HEIGHT - contentY - PADDING;
+    int lineHeight = 12;
+    int textX = contentX + 10;
+    int baseY = contentY + 5 - scrollOffset;
+
+    for (int i = 0; i < contentLines.size(); i++) {
+      String s = contentLines.get(i).text.getString();
+      if (!s.startsWith(prefix)) {
+        continue;
+      }
+      int y = baseY + i * lineHeight;
+      int hitTop = Math.max(y, contentY);
+      int hitBottom = Math.min(y + lineHeight, contentY + contentHeight);
+      if (hitTop >= hitBottom) {
+        continue; // fully clipped by scissor — nothing rendered
+      }
+      int lineW = font.width(s);
+      if (mouseX >= textX && mouseX < textX + lineW && mouseY >= hitTop && mouseY < hitBottom) {
         return true;
       }
     }
-
-    // Check for Reset confirmation
-    if (selectedTab == Tab.RESET) {
-      int contentX = PADDING + SIDEBAR_WIDTH + PADDING;
-      int contentWidth = width - contentX - PADDING;
-      int buttonY = PADDING + HEADER_HEIGHT + 80;
-      int buttonWidth = 120;
-      int buttonX = contentX + (contentWidth - buttonWidth) / 2;
-
-      if (mouseX >= buttonX
-          && mouseX < buttonX + buttonWidth
-          && mouseY >= buttonY
-          && mouseY < buttonY + 20) {
-        performReset();
-        return true;
-      }
-    }
-
-    // Check for Trade toggle
-    if (selectedTab == Tab.TRADE) {
-      int contentX = PADDING + SIDEBAR_WIDTH + PADDING;
-      int contentWidth = width - contentX - PADDING;
-      int buttonY = PADDING + HEADER_HEIGHT + 40;
-      int buttonWidth = 140;
-      int buttonX = contentX + (contentWidth - buttonWidth) / 2;
-
-      if (mouseX >= buttonX
-          && mouseX < buttonX + buttonWidth
-          && mouseY >= buttonY
-          && mouseY < buttonY + 20) {
-        toggleTrade();
-        return true;
-      }
-    }
-
     return false;
   }
 
@@ -409,6 +421,9 @@ public class PimScreen extends Screen {
 
                 double value = result.value.get();
                 double boxes = Math.round(value / 2.0);
+                // Skip already-completed series — listing "0 boxes" lines clutters
+                // the view and the user only cares about what's still outstanding.
+                if (boxes <= 0) continue;
                 totalBoxes += boxes;
                 seriesCount++;
 
