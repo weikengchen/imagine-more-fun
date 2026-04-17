@@ -110,19 +110,37 @@ verify_jar() {
     unzip -tq "${jar_file}" 2>/dev/null
 }
 
+# Write to a temp file in the SAME directory as the target, then atomically
+# rename it over the target. POSIX rename(2) is atomic and preserves the old
+# inode for any already-running JVM (whose open ZipFile handle holds cached
+# offsets into the old central directory), while new launches pick up the new
+# inode. An in-place truncate-and-rewrite corrupts the file from the running
+# JVM's perspective and triggers "invalid zip signature" crashes.
+#
+# The temp file MUST live on the same filesystem/volume as the destination,
+# otherwise `mv` silently falls back to a non-atomic copy+unlink. Using the
+# target directory guarantees this on Linux and macOS (APFS/HFS+).
+#
+# On Windows this pattern does not work: the OS refuses to rename over a file
+# that another process has open. That case needs versioned filenames or a
+# pre-launch swap hook — out of scope for this macOS deploy script.
+TEMP_JAR="${TARGET_JAR}.new"
+
 MAX_RETRIES=3
 RETRY_COUNT=0
 
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-    echo "Copying jar to ${TARGET_DIR}..."
-    cp -f "${SOURCE_JAR}" "${TARGET_JAR}"
+    echo "Copying jar to ${TEMP_JAR}..."
+    cp -f "${SOURCE_JAR}" "${TEMP_JAR}"
 
     echo "Verifying copied jar integrity..."
-    if verify_jar "${TARGET_JAR}"; then
-        echo "Jar verification successful!"
+    if verify_jar "${TEMP_JAR}"; then
+        echo "Jar verification successful! Atomically swapping into place..."
+        mv -f "${TEMP_JAR}" "${TARGET_JAR}"
         break
     else
         RETRY_COUNT=$((RETRY_COUNT + 1))
+        rm -f "${TEMP_JAR}"
         if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
             echo "Warning: Jar verification failed (attempt $RETRY_COUNT/$MAX_RETRIES). Retrying..."
             sleep 1
