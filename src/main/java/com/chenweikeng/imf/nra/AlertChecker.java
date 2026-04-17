@@ -1,6 +1,7 @@
 package com.chenweikeng.imf.nra;
 
 import com.chenweikeng.imf.nra.config.ModConfig;
+import com.chenweikeng.imf.nra.handler.FireworkViewingHandler;
 import com.chenweikeng.imf.nra.tracker.PlayerMovementTracker;
 import com.chenweikeng.imf.nra.tracker.RideStateTracker;
 import com.chenweikeng.imf.nra.tracker.SuppressionRegionTracker;
@@ -34,7 +35,8 @@ public class AlertChecker {
         && !rideStateTracker.hasRidenRecently(state.getAbsoluteTickCounter())
         && !rideStateTracker.hasVehicleRecently(state.getAbsoluteTickCounter())
         && !suppressionRegionTracker.isInROTRExceptionArea(client)
-        && !rideStateTracker.isLincolnSuppressionActive()) {
+        && !rideStateTracker.isLincolnSuppressionActive()
+        && !FireworkViewingHandler.getInstance().isViewingFirework()) {
       SoundHelper.playConfiguredSound(client);
     }
   }
