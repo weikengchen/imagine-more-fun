@@ -4,7 +4,6 @@ import com.chenweikeng.imf.nra.NotRidingAlertClient;
 import com.chenweikeng.imf.pim.PimClient;
 import com.chenweikeng.imf.skincache.SkinCacheMod;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,20 +35,5 @@ public class ImfClient implements ClientModInitializer {
     new NotRidingAlertClient().onInitializeClient();
     new PimClient().onInitializeClient();
     new SkinCacheMod().onInitializeClient();
-
-    // Swap the macOS Dock icon for the ImagineFun logo while connected to ImagineFun, and restore
-    // it on disconnect. Deferred to JOIN because applying it during init runs before the GLFW
-    // window exists, and macOS resets the icon when the window comes up. No-op on other OSes.
-    ClientPlayConnectionEvents.JOIN.register(
-        (handler, sender, client) -> {
-          if (client.getCurrentServer() == null || client.getCurrentServer().ip == null) {
-            return;
-          }
-          if (client.getCurrentServer().ip.toLowerCase().endsWith(".imaginefun.net")) {
-            MacosDockIconHandler.apply();
-          }
-        });
-    ClientPlayConnectionEvents.DISCONNECT.register(
-        (handler, client) -> MacosDockIconHandler.reset());
   }
 }
