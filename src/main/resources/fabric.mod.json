@@ -24,7 +24,6 @@
 	"mixins": [
 		"imf.mixins.json"
 	],
-	"accessWidener": "imf.accesswidener",
 	"depends": {
 		"fabricloader": ">=0.18.4",
 		"minecraft": "~1.21.11",
