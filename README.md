@@ -6,6 +6,8 @@ A merged quality-of-life mod for the ImagineFun Minecraft server, bundling three
 - **Pim!** — pin collection visual highlights, trader warping, and pin-book tooling. See `com.chenweikeng.imf.pim.*`.
 - **SkinCache** — local caching of player skin textures to reduce Mojang CDN traffic. See `com.chenweikeng.imf.skincache.*`.
 
+All features activate only while connected to an `*.imaginefun.net` server.
+
 ## Target
 
 - Minecraft **1.21.11** (Fabric)
@@ -18,12 +20,45 @@ A merged quality-of-life mod for the ImagineFun Minecraft server, bundling three
 # → build/libs/imaginemorefun-3.0.0.jar
 ```
 
+## Features
+
+### NRA — Not Riding Alert
+
+- **Alert when not riding** — configurable alert sound with a minimum-ride-time filter.
+- **Ride tracker / Strategy HUD** — on-screen list of rides toward a configurable goal (1K / 5K / 10K), with V0 / V1 / V2 layouts, sortable by several rules, optional closest-ride highlight, customizable colors, and configurable background opacity. Display can be always / only-when-riding / only-when-not-riding / never, and filtered to only autograbbing rides.
+- **Setup wizard** — guided first-run tutorial (`/imf setup`) covering alerts, visuals, autograbbing, UI hiding, ride selection, tracker, session extras, and profiles.
+- **Config profiles** — named saved configs with history, diff summaries, and one-command switching (`/imf profile <name>`).
+- **Ride report** — daily ride summary screen (`/ridereport [date]`), plus popup / chat / silent notification modes.
+- **Session stats HUD** — daily rides, ride time, rides-per-hour, and streak in the bottom-right.
+- **Advance-notice sounds** — per-ride chime N seconds before a ride ends.
+- **Autograbbing aids** — visual outlines of autograb regions, automatic cursor release on autograb or ride start, optional window minimize on autograb or ride start, and PC hibernation while riding.
+- **Visual tweaks** — dim-when-riding, fullbright mode (none / riding / not-riding / always), modernized closed captions (move `[CC]` messages out of chat), hide scoreboard / chat / health / name tags / hotbar / XP level / love-potion messages.
+- **Firework viewing** — alerts, time-of-day reset, and blindness are all suppressed inside the firework area.
+- **OpenAudioMC integration** — `/oa connect|disconnect|reconnect|volume` plus optional auto-connect, headless browser audio session, and an audio-boost reminder.
+- **Native status-bar indicator** — countdown helper in the macOS menu bar / Windows system tray, driven by a native helper bundled with the mod.
+
+### PIM — Pin tooling
+
+- **Pin-book tooling** — value / FMV lookup, trade helper, compute pending-pin view with hide-empty, export, and reset (`/pim:compute`, `/pim:trade`, `/pim:reset`, `/pim:export`, `/pim:value`, `/pim:fmv`).
+- **Unified PIM screen** — `/pim` opens a combined UI with click-to-copy / click-to-trade / click-to-reset hit regions.
+- **Alpha table overlay** — rarity/alpha info rendered on top of container screens, anchored to the right edge.
+- **Pin pack overlay** — color analysis and visual overlay for pin packs.
+- **Pin hoarder** — auto-confirm helper for pin-trade dialogs.
+- **Boss-bar / trader warping** and scoreboard pin highlights (inherited from upstream Pim!).
+
+### SkinCache
+
+- Local caching of player skin textures and skull-block skins to reduce Mojang CDN traffic.
+
 ## Commands
 
-All three original command surfaces are preserved verbatim:
-
-- `/nra`, `/nra ridereport`, `/oa connect|disconnect|reconnect|volume|…`
-- `/pim:compute`, `/pim:trade`, `/pim:reset`, `/pim:export`, `/pim:value`, `/pim:fmv`
+- `/imf` — open Profile Management screen
+- `/imf setup` — (re-)run the first-run tutorial
+- `/imf profile <name>` — switch to a saved config profile
+- `/ridereport [date]` — open the daily ride report
+- `/oa connect | disconnect | reconnect | volume` — OpenAudioMC controls
+- `/pim` — open the unified PIM UI
+- `/pim:compute`, `/pim:trade`, `/pim:reset`, `/pim:export`, `/pim:value`, `/pim:fmv` — pin tooling
 
 ## Storage
 
