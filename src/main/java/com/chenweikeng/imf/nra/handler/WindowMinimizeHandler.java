@@ -12,6 +12,11 @@ public final class WindowMinimizeHandler {
   // Monitor for 15 seconds (300 ticks @ 20tps) after each restore; long enough
   // to catch a click-induced resize/iconify but short enough to avoid log spam.
   private static final int MONITOR_TICKS = 300;
+  // Dock-thumbnail-sized frames look like <100px wide on macOS. If GLFW hands
+  // us anything below this during the post-restore grace window, assume the
+  // deminiaturize animation reported a bogus frame and force the pre-minimize
+  // geometry back.
+  private static final int SHRINK_THRESHOLD_PX = 200;
 
   private int monitorTicksLeft = 0;
   private int lastW = -1;
@@ -20,6 +25,14 @@ public final class WindowMinimizeHandler {
   private int lastY = Integer.MIN_VALUE;
   private boolean lastIconified = false;
   private boolean lastMaximized = false;
+
+  private int savedW = -1;
+  private int savedH = -1;
+  private int savedX = Integer.MIN_VALUE;
+  private int savedY = Integer.MIN_VALUE;
+  private boolean savedMaximized = false;
+  private boolean hasSavedState = false;
+  private boolean recoveryAttempted = false;
 
   private WindowMinimizeHandler() {}
 
@@ -97,6 +110,33 @@ public final class WindowMinimizeHandler {
       lastW = sw[0];
       lastH = sh[0];
     }
+
+    if (!recoveryAttempted
+        && hasSavedState
+        && (sw[0] < SHRINK_THRESHOLD_PX || sh[0] < SHRINK_THRESHOLD_PX)) {
+      recoveryAttempted = true;
+      LOGGER.warn(
+          "[monitor] shrink detected {}x{} at ({},{}); restoring to {}x{} at ({},{}) maximized={}",
+          sw[0],
+          sh[0],
+          px[0],
+          py[0],
+          savedW,
+          savedH,
+          savedX,
+          savedY,
+          savedMaximized);
+      int targetW = savedW, targetH = savedH, targetX = savedX, targetY = savedY;
+      boolean targetMaximized = savedMaximized;
+      client.execute(
+          () -> {
+            GLFW.glfwSetWindowPos(h, targetX, targetY);
+            GLFW.glfwSetWindowSize(h, targetW, targetH);
+            if (targetMaximized) {
+              GLFW.glfwMaximizeWindow(h);
+            }
+          });
+    }
     if (px[0] != lastX || py[0] != lastY) {
       LOGGER.info(
           "[monitor] pos ({},{}) -> ({},{}) ticksLeft={}",
@@ -142,6 +182,16 @@ public final class WindowMinimizeHandler {
 
     if (!isMinimized) {
       logSnapshot(handle, "before-minimize");
+      int[] sw = new int[1], sh = new int[1];
+      int[] px = new int[1], py = new int[1];
+      GLFW.glfwGetWindowSize(handle, sw, sh);
+      GLFW.glfwGetWindowPos(handle, px, py);
+      savedW = sw[0];
+      savedH = sh[0];
+      savedX = px[0];
+      savedY = py[0];
+      savedMaximized = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_MAXIMIZED) == GLFW.GLFW_TRUE;
+      hasSavedState = true;
       client.execute(
           () -> {
             GLFW.glfwIconifyWindow(handle);
@@ -182,27 +232,14 @@ public final class WindowMinimizeHandler {
       client.execute(
           () -> {
             GLFW.glfwRestoreWindow(handle);
-            GLFW.glfwSetWindowAttrib(handle, GLFW.GLFW_FLOATING, GLFW.GLFW_TRUE);
+            GLFW.glfwFocusWindow(handle);
+            GLFW.glfwRequestWindowAttention(handle);
 
-            client.execute(
-                () -> {
-                  long window = client.getWindow().handle();
-                  GLFW.glfwShowWindow(window);
+            logSnapshot(handle, "after-restore");
+            recoveryAttempted = false;
+            startMonitoring(handle);
 
-                  client.execute(
-                      () -> {
-                        long h = client.getWindow().handle();
-                        GLFW.glfwFocusWindow(h);
-                        GLFW.glfwRequestWindowAttention(h);
-                        GLFW.glfwSetWindowAttrib(h, GLFW.GLFW_FLOATING, GLFW.GLFW_FALSE);
-
-                        logSnapshot(h, "after-restore");
-                        startMonitoring(h);
-
-                        ReminderHandler.getInstance().lastAudioReminderTick =
-                            -Timing.REMINDER_INTERVAL_TICKS;
-                      });
-                });
+            ReminderHandler.getInstance().lastAudioReminderTick = -Timing.REMINDER_INTERVAL_TICKS;
           });
     }
   }
