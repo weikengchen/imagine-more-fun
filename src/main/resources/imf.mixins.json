@@ -6,9 +6,6 @@
 	"mixins": [],
 	"client": [
 		"ImfAlphaTableContainerScreenMixin",
-		"NraBossEventPacketMixin",
-		"NraEntityGlowMixin",
-		"NraLocalPlayerPositionMixin",
 		"ImfInventoryScreenMixin",
 		"ImfScreenInvoker",
 		"NraAvatarRendererMixin",

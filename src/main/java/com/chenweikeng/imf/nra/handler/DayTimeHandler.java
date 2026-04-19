@@ -4,15 +4,12 @@ import com.chenweikeng.imf.nra.GameState;
 import com.chenweikeng.imf.nra.ServerState;
 import com.chenweikeng.imf.nra.config.FullbrightMode;
 import com.chenweikeng.imf.nra.config.ModConfig;
-import com.chenweikeng.imf.nra.tracker.QuestTriangulationTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 
 public class DayTimeHandler {
   private static final long NOON = 6000L;
   private static final long SUNSET_START = 12000L;
-  private static final long MIDNIGHT = 18000L;
-  private static final long SUNRISE_END = 1000L;
 
   public void resetDayTimeIfNeeded(Minecraft client) {
     if (!ServerState.isImagineFunServer()) {
@@ -28,17 +25,6 @@ public class DayTimeHandler {
       return;
     }
 
-    // Quest tracking takes priority - set to night for beam visibility
-    if (QuestTriangulationTracker.getInstance().hasConfidentEstimate()) {
-      long time = level.getDayTime() % 24000L;
-      // Set to midnight if it's daytime (between sunrise end and sunset start)
-      if (time >= SUNRISE_END && time < SUNSET_START) {
-        level.getLevelData().setDayTime(MIDNIGHT);
-      }
-      return;
-    }
-
-    // Normal fullbright logic
     boolean isRiding = GameState.getInstance().isRiding();
     FullbrightMode mode = ModConfig.currentSetting.fullbrightMode;
     boolean shouldApplyFullbright =

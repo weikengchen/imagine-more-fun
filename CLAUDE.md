@@ -43,7 +43,7 @@ All mixins live flat in `com.chenweikeng.imf.mixin.*` with prefixes indicating o
 - `SkinCache*` — SkinCache mixins
 - `Imf*` — Shared/umbrella mixins
 
-Registered in single `imf.mixins.json`. Access wideners for rendering APIs are in `imf.accesswidener`.
+Registered in single `imf.mixins.json`.
 
 ### Server Detection
 

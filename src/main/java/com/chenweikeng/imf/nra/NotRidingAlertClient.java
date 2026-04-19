@@ -17,7 +17,6 @@ import com.chenweikeng.imf.nra.handler.FireworkViewingHandler;
 import com.chenweikeng.imf.nra.handler.HibernationHandler;
 import com.chenweikeng.imf.nra.handler.ReminderHandler;
 import com.chenweikeng.imf.nra.handler.ScoreboardHandler;
-import com.chenweikeng.imf.nra.render.QuestTargetBeamRenderer;
 import com.chenweikeng.imf.nra.report.DailyRideSnapshot;
 import com.chenweikeng.imf.nra.report.RideReportNotifier;
 import com.chenweikeng.imf.nra.report.ui.RideReportScreen;
@@ -32,7 +31,6 @@ import com.chenweikeng.imf.nra.status.StatusBarController;
 import com.chenweikeng.imf.nra.strategy.StrategyHudRendererDispatcher;
 import com.chenweikeng.imf.nra.tracker.FoodConsumptionTracker;
 import com.chenweikeng.imf.nra.tracker.PlayerMovementTracker;
-import com.chenweikeng.imf.nra.tracker.QuestTriangulationTracker;
 import com.chenweikeng.imf.nra.tracker.RideStateTracker;
 import com.chenweikeng.imf.nra.tracker.SuppressionRegionTracker;
 import com.chenweikeng.imf.nra.wizard.TutorialManager;
@@ -82,7 +80,6 @@ public class NotRidingAlertClient implements ClientModInitializer {
     LOGGER.info("Not Riding Alert client initialized");
     MonkeycraftCompat.init();
     AutograbRegionRenderer.register();
-    QuestTargetBeamRenderer.register();
 
     ClientPlayConnectionEvents.JOIN.register(
         (handler, sender, client) -> {
@@ -223,7 +220,6 @@ public class NotRidingAlertClient implements ClientModInitializer {
     cursorManager.reset();
     advanceNoticeHandler.reset();
     RideReportNotifier.getInstance().reset();
-    QuestTriangulationTracker.getInstance().reset();
     gameState.reset();
     tickCounter = 0;
   }
