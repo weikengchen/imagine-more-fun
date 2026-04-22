@@ -17,7 +17,10 @@ import com.chenweikeng.imf.nra.handler.FireworkViewingHandler;
 import com.chenweikeng.imf.nra.handler.HibernationHandler;
 import com.chenweikeng.imf.nra.handler.ReminderHandler;
 import com.chenweikeng.imf.nra.handler.ScoreboardHandler;
+import com.chenweikeng.imf.nra.report.DailyReport;
+import com.chenweikeng.imf.nra.report.DailyReportGenerator;
 import com.chenweikeng.imf.nra.report.DailyRideSnapshot;
+import com.chenweikeng.imf.nra.report.RideReportChatRenderer;
 import com.chenweikeng.imf.nra.report.RideReportNotifier;
 import com.chenweikeng.imf.nra.report.ui.RideReportScreen;
 import com.chenweikeng.imf.nra.ride.AutograbHolder;
@@ -335,6 +338,14 @@ public class NotRidingAlertClient implements ClientModInitializer {
                   Minecraft client = Minecraft.getInstance();
                   client.execute(
                       () -> {
+                        if (MonkeycraftCompat.isClientConnected()) {
+                          DailyReport report = DailyReportGenerator.generateLive();
+                          if (report != null) {
+                            RideReportChatRenderer.send(client, report);
+                            RideReportNotifier.getInstance().markViewed();
+                            return;
+                          }
+                        }
                         client.setScreen(RideReportScreen.createLive(client.screen));
                       });
                   return 1;
@@ -350,6 +361,14 @@ public class NotRidingAlertClient implements ClientModInitializer {
                           Minecraft client = Minecraft.getInstance();
                           client.execute(
                               () -> {
+                                if (MonkeycraftCompat.isClientConnected()) {
+                                  DailyReport report = DailyReportGenerator.generate(date);
+                                  if (report != null) {
+                                    RideReportChatRenderer.send(client, report);
+                                    RideReportNotifier.getInstance().markViewed();
+                                    return;
+                                  }
+                                }
                                 client.setScreen(new RideReportScreen(client.screen, date));
                               });
                           return 1;
