@@ -35,12 +35,24 @@ Design reference: `/Users/cusgadmin/Downloads/compass_artifact_wf-ccdf816b-1bc7-
 7. Roll the day: either delete the file or advance system clock past midnight, run `/rideplan`. Expect: fresh 5 rides and a new date in the file.
 8. Edge case: set `maxGoal` low, ride everything past it, delete plan. Expect: header says "No eligible rides".
 
-### Stage 2 — Auto-completion + Tier-1 stamps
-- [ ] Hook `RideCountManager` delta detection
-- [ ] Mark nodes complete when delta ≥ k
-- [ ] On node complete: chat line + `happy_villager` particles + `note_block.bell`
-- [ ] Update `/rideplan` output to show ● / ◐ / ○
-- [ ] Persist completion state
+### Stage 2 — Auto-completion + Tier-1 stamps ✅ shipped
+- [x] Hook `RideCountManager` delta detection (per-tick poll from `NotRidingAlertClient.onClientTick`)
+- [x] Mark nodes complete when delta ≥ k
+- [x] On node complete: chat line + `happy_villager` particles + `note_block.bell`
+- [x] Update `/rideplan` output to show ● / ◐ / ○ with live `m/k` badge
+- [x] Persist completion state (saved to `nra-daily-plan.json` on change)
+- [x] Plan-complete flourish: level-up sound + double particles + "Daily Ride Plan complete!" line
+
+**How to test Stage 2**
+1. Launch ImagineFun with the new JAR.
+2. Run `/rideplan` to see today's plan (any already-completed nodes will render with `●`).
+3. Ride one of the listed rides. Expect after each completion increment:
+   - Chat: `✨ [IMF] Node complete! <ride name> (2/5)`
+   - Note-block bell sound
+   - Burst of 12 green `happy_villager` particles around your head
+4. Run `/rideplan` again — that node now renders with `●` in green, others still `○`.
+5. Complete all 5 nodes → expect extra "Daily Ride Plan complete!" line + level-up sound + 24 particles.
+6. Relog mid-way → completed nodes persist; progress on incomplete nodes comes from live count delta against the saved snapshot.
 
 ### Stage 3 — HUD breadcrumb
 - [ ] Register `imaginemorefun:daily_plan` HUD layer above hotbar

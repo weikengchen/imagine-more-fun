@@ -1,5 +1,6 @@
 package com.chenweikeng.imf.nra.dailyplan;
 
+import com.chenweikeng.imf.nra.ride.RideCountManager;
 import com.chenweikeng.imf.nra.ride.RideName;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -16,6 +17,8 @@ public final class DailyPlanChatRenderer {
   private static final int K_COLOR = 0xFF55FFFF;
   private static final int INDEX_COLOR = 0xFFAAAAAA;
   private static final int EMPTY_COLOR = 0xFFFFAA00;
+  private static final int DONE_COLOR = 0xFF55FF55;
+  private static final int PROGRESS_COLOR = 0xFFFFAA00;
 
   private DailyPlanChatRenderer() {}
 
@@ -24,17 +27,35 @@ public final class DailyPlanChatRenderer {
       return;
     }
 
+    int doneNodes = 0;
+    if (plan.nodes != null) {
+      for (DailyPlanNode node : plan.nodes) {
+        if (node.completed) {
+          doneNodes++;
+        }
+      }
+    }
+    int totalNodes = plan.nodes == null ? 0 : plan.nodes.size();
+
     sendLine(client, Component.literal(DIVIDER).withColor(HEADER_COLOR));
-    sendLine(
-        client,
+    Component header =
         Component.empty()
             .append(Component.literal("\u2728 ").withColor(HEADER_COLOR))
             .append(
                 Component.literal("Today's Ride Plan")
                     .withStyle(ChatFormatting.BOLD)
                     .withColor(HEADER_COLOR))
-            .append(
-                Component.literal("  " + formatDateFriendly(plan.date)).withColor(INDEX_COLOR)));
+            .append(Component.literal("  " + formatDateFriendly(plan.date)).withColor(INDEX_COLOR));
+    if (totalNodes > 0) {
+      header =
+          header
+              .copy()
+              .append(
+                  Component.literal("  " + doneNodes + "/" + totalNodes)
+                      .withStyle(ChatFormatting.BOLD)
+                      .withColor(doneNodes == totalNodes ? DONE_COLOR : PROGRESS_COLOR));
+    }
+    sendLine(client, header);
 
     if (plan.nodes == null || plan.nodes.isEmpty()) {
       sendLine(
@@ -45,18 +66,49 @@ public final class DailyPlanChatRenderer {
       return;
     }
 
+    RideCountManager counts = RideCountManager.getInstance();
     for (int i = 0; i < plan.nodes.size(); i++) {
       DailyPlanNode node = plan.nodes.get(i);
-      String displayName = RideName.fromMatchString(node.ride).getDisplayName();
+      RideName ride = RideName.fromMatchString(node.ride);
+
+      Integer snap = plan.snapshotCounts == null ? null : plan.snapshotCounts.get(node.ride);
+      int baseline = snap == null ? 0 : snap;
+      int delta = Math.max(0, counts.getRideCount(ride) - baseline);
+      int progress = Math.min(delta, node.k);
+
+      String glyph;
+      int glyphColor;
+      int nameColor;
+      if (node.completed) {
+        glyph = "\u25CF";
+        glyphColor = DONE_COLOR;
+        nameColor = DONE_COLOR;
+      } else if (progress > 0) {
+        glyph = "\u25D0";
+        glyphColor = PROGRESS_COLOR;
+        nameColor = RIDE_COLOR;
+      } else {
+        glyph = "\u25CB";
+        glyphColor = INDEX_COLOR;
+        nameColor = RIDE_COLOR;
+      }
+
+      Component progressBadge =
+          node.completed
+              ? Component.literal(" \u00D7" + node.k)
+                  .withStyle(ChatFormatting.BOLD)
+                  .withColor(DONE_COLOR)
+              : Component.literal(" " + progress + "/" + node.k)
+                  .withStyle(ChatFormatting.BOLD)
+                  .withColor(progress > 0 ? PROGRESS_COLOR : K_COLOR);
+
       sendLine(
           client,
           Component.empty()
-              .append(Component.literal(" " + (i + 1) + ". \u25CB ").withColor(INDEX_COLOR))
-              .append(Component.literal(displayName).withColor(RIDE_COLOR))
-              .append(
-                  Component.literal(" \u00D7" + node.k)
-                      .withStyle(ChatFormatting.BOLD)
-                      .withColor(K_COLOR)));
+              .append(Component.literal(" " + (i + 1) + ". ").withColor(INDEX_COLOR))
+              .append(Component.literal(glyph + " ").withColor(glyphColor))
+              .append(Component.literal(ride.getDisplayName()).withColor(nameColor))
+              .append(progressBadge));
     }
 
     sendLine(client, Component.literal(DIVIDER).withColor(HEADER_COLOR));

@@ -10,6 +10,7 @@ import com.chenweikeng.imf.nra.config.profile.ui.ProfileManagementScreen;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlan;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanChatRenderer;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanManager;
+import com.chenweikeng.imf.nra.dailyplan.DailyPlanProgressTracker;
 import com.chenweikeng.imf.nra.handler.AdvanceNoticeHandler;
 import com.chenweikeng.imf.nra.handler.AutograbFailureHandler;
 import com.chenweikeng.imf.nra.handler.AutograbRegionRenderer;
@@ -195,6 +196,7 @@ public class NotRidingAlertClient implements ClientModInitializer {
     ClosedCaptionHolder.getInstance().tick();
 
     RideCountManager.getInstance().checkAndSaveIfNeeded();
+    DailyPlanProgressTracker.getInstance().tick(client);
     SessionTracker.getInstance().checkAndSaveIfNeeded();
     RideReportNotifier.getInstance().tick();
     FoodConsumptionTracker.getInstance().tick();
