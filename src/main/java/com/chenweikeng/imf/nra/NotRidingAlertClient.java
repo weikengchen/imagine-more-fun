@@ -7,6 +7,9 @@ import com.chenweikeng.imf.nra.config.profile.HistoryManager;
 import com.chenweikeng.imf.nra.config.profile.ProfileCommandHandler;
 import com.chenweikeng.imf.nra.config.profile.ProfileManager;
 import com.chenweikeng.imf.nra.config.profile.ui.ProfileManagementScreen;
+import com.chenweikeng.imf.nra.dailyplan.DailyPlan;
+import com.chenweikeng.imf.nra.dailyplan.DailyPlanChatRenderer;
+import com.chenweikeng.imf.nra.dailyplan.DailyPlanManager;
 import com.chenweikeng.imf.nra.handler.AdvanceNoticeHandler;
 import com.chenweikeng.imf.nra.handler.AutograbFailureHandler;
 import com.chenweikeng.imf.nra.handler.AutograbRegionRenderer;
@@ -117,6 +120,7 @@ public class NotRidingAlertClient implements ClientModInitializer {
           registerNraCommand(dispatcher);
           registerOaCommand(dispatcher);
           registerRideReportCommand(dispatcher);
+          registerRidePlanCommand(dispatcher);
         });
 
     WorldRenderEvents.AFTER_ENTITIES.register(
@@ -327,6 +331,22 @@ public class NotRidingAlertClient implements ClientModInitializer {
                           }
                           return 1;
                         })));
+  }
+
+  private static void registerRidePlanCommand(
+      CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    dispatcher.register(
+        ClientCommandManager.literal("rideplan")
+            .executes(
+                context -> {
+                  Minecraft client = Minecraft.getInstance();
+                  client.execute(
+                      () -> {
+                        DailyPlan plan = DailyPlanManager.getInstance().getOrCreateToday();
+                        DailyPlanChatRenderer.send(client, plan);
+                      });
+                  return 1;
+                }));
   }
 
   private static void registerRideReportCommand(
