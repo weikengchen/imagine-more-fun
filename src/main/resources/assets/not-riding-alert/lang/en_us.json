@@ -117,5 +117,7 @@
   "config.not-riding-alert.rideReportNotifyMode.popup": "Popup",
   "config.not-riding-alert.rideReportNotifyMode.chat": "Chat reminder",
   "config.not-riding-alert.rideReportNotifyMode.never": "Never",
+  "config.not-riding-alert.randomRideOverride": "Override /randomride with goal-aware warp",
+  "config.not-riding-alert.randomRideOverride.tooltip": "When enabled, /randomride picks a random ride you still have an ongoing goal on and warps you there via /w. Falls back to the server's /randomride if you have no remaining goals.",
   "options.nra.openaudiomc_volume": "OpenAudioMc Volume"
 }

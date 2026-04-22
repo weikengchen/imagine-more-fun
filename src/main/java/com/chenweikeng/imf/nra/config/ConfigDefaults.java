@@ -43,4 +43,5 @@ public final class ConfigDefaults {
   public static final boolean SHOW_SESSION_STATS = true;
   public static final boolean ENABLE_OPEN_AUDIO_MC = true;
   public static final RideReportNotifyMode RIDE_REPORT_NOTIFY_MODE = RideReportNotifyMode.POPUP;
+  public static final boolean RANDOM_RIDE_OVERRIDE = true;
 }

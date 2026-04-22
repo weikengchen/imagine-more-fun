@@ -138,6 +138,17 @@ public class ClothConfigScreen {
                             + mode.name().toLowerCase()))
             .build());
 
+    general.addEntry(
+        entryBuilder
+            .startBooleanToggle(
+                Component.translatable("config.not-riding-alert.randomRideOverride"),
+                profile.randomRideOverride)
+            .setDefaultValue(ConfigDefaults.RANDOM_RIDE_OVERRIDE)
+            .setTooltip(
+                Component.translatable("config.not-riding-alert.randomRideOverride.tooltip"))
+            .setSaveConsumer(newValue -> profile.randomRideOverride = newValue)
+            .build());
+
     ConfigCategory visual =
         builder.getOrCreateCategory(
             Component.translatable("config.not-riding-alert.category.visual"));

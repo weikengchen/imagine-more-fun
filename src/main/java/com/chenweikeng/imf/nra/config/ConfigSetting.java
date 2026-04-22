@@ -54,6 +54,7 @@ public class ConfigSetting {
   public boolean showSessionStats = ConfigDefaults.SHOW_SESSION_STATS;
   public boolean enableOpenAudioMc = ConfigDefaults.ENABLE_OPEN_AUDIO_MC;
   public RideReportNotifyMode rideReportNotifyMode = ConfigDefaults.RIDE_REPORT_NOTIFY_MODE;
+  public boolean randomRideOverride = ConfigDefaults.RANDOM_RIDE_OVERRIDE;
 
   public int getAdvanceNoticeSeconds(RideName ride) {
     return advanceNoticeSeconds.getOrDefault(ride.toMatchString(), 0);
@@ -104,6 +105,7 @@ public class ConfigSetting {
     showSessionStats = ConfigDefaults.SHOW_SESSION_STATS;
     enableOpenAudioMc = ConfigDefaults.ENABLE_OPEN_AUDIO_MC;
     rideReportNotifyMode = ConfigDefaults.RIDE_REPORT_NOTIFY_MODE;
+    randomRideOverride = ConfigDefaults.RANDOM_RIDE_OVERRIDE;
   }
 
   public ConfigSetting copy() {
@@ -150,6 +152,7 @@ public class ConfigSetting {
     copy.showSessionStats = this.showSessionStats;
     copy.enableOpenAudioMc = this.enableOpenAudioMc;
     copy.rideReportNotifyMode = this.rideReportNotifyMode;
+    copy.randomRideOverride = this.randomRideOverride;
     return copy;
   }
 
@@ -193,6 +196,7 @@ public class ConfigSetting {
         && showSessionStats == that.showSessionStats
         && enableOpenAudioMc == that.enableOpenAudioMc
         && rideReportNotifyMode == that.rideReportNotifyMode
+        && randomRideOverride == that.randomRideOverride
         && Objects.equals(soundId, that.soundId)
         && Objects.equals(minRideTimeMinutes, that.minRideTimeMinutes)
         && Objects.equals(hiddenRides, that.hiddenRides)
@@ -240,6 +244,7 @@ public class ConfigSetting {
         advanceNoticeSeconds,
         showSessionStats,
         enableOpenAudioMc,
-        rideReportNotifyMode);
+        rideReportNotifyMode,
+        randomRideOverride);
   }
 }
