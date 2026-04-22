@@ -59,9 +59,7 @@ public final class RideReportChatRenderer {
             .withColor(HEADER_COLOR));
     sendLine(client, gradeLine);
 
-    sendLine(
-        client,
-        Component.literal("~ " + report.title + " ~").withColor(report.grade.color));
+    sendLine(client, Component.literal("~ " + report.title + " ~").withColor(report.grade.color));
 
     String rideTimeStr = TimeFormatUtil.formatDuration(report.totalRideTimeSeconds);
     String onlineStr = TimeFormatUtil.formatDuration(report.totalOnlineSeconds);
@@ -96,8 +94,7 @@ public final class RideReportChatRenderer {
                 .withColor(DIM_COLOR);
       } else {
         comparison =
-            Component.literal("= Same as " + compLabel + " — consistency!")
-                .withColor(ACCENT_COLOR);
+            Component.literal("= Same as " + compLabel + " — consistency!").withColor(ACCENT_COLOR);
       }
       sendLine(client, comparison);
     }
@@ -132,9 +129,7 @@ public final class RideReportChatRenderer {
     }
 
     if (!report.newMilestones.isEmpty()) {
-      sendLine(
-          client,
-          Component.literal("✨ New Heights Reached!").withColor(MILESTONE_COLOR));
+      sendLine(client, Component.literal("✨ New Heights Reached!").withColor(MILESTONE_COLOR));
       for (DailyReport.MilestoneReached m : report.newMilestones) {
         sendLine(
             client,
@@ -144,17 +139,14 @@ public final class RideReportChatRenderer {
                     Component.literal(m.ride.getDisplayName())
                         .withStyle(ChatFormatting.BOLD)
                         .withColor(MILESTONE_COLOR))
-                .append(
-                    Component.literal(" reached " + m.milestone + "!").withColor(TEXT_COLOR)));
+                .append(Component.literal(" reached " + m.milestone + "!").withColor(TEXT_COLOR)));
       }
     }
 
     if (!report.rideDeltas.isEmpty()) {
       sendLine(
           client,
-          Component.literal("Top Rides")
-              .withStyle(ChatFormatting.BOLD)
-              .withColor(ACCENT_COLOR));
+          Component.literal("Top Rides").withStyle(ChatFormatting.BOLD).withColor(ACCENT_COLOR));
       int shown = 0;
       for (DailyReport.RideDelta rd : report.rideDeltas) {
         if (shown >= MAX_RIDE_ROWS) {
@@ -178,15 +170,11 @@ public final class RideReportChatRenderer {
       }
       int remaining = report.rideDeltas.size() - shown;
       if (remaining > 0) {
-        sendLine(
-            client,
-            Component.literal("   … and " + remaining + " more").withColor(DIM_COLOR));
+        sendLine(client, Component.literal("   … and " + remaining + " more").withColor(DIM_COLOR));
       }
     }
 
-    if (report.pinHoarderTrades > 0
-        || report.pinBoxesOpened > 0
-        || report.newMintPinsAdded > 0) {
+    if (report.pinHoarderTrades > 0 || report.pinBoxesOpened > 0 || report.newMintPinsAdded > 0) {
       sendLine(
           client,
           Component.literal("Pin Activity").withStyle(ChatFormatting.BOLD).withColor(PIN_COLOR));
@@ -223,9 +211,7 @@ public final class RideReportChatRenderer {
     if (report.foodConsumed != null && !report.foodConsumed.isEmpty()) {
       sendLine(
           client,
-          Component.literal("Food Consumed")
-              .withStyle(ChatFormatting.BOLD)
-              .withColor(FOOD_COLOR));
+          Component.literal("Food Consumed").withStyle(ChatFormatting.BOLD).withColor(FOOD_COLOR));
       for (java.util.Map.Entry<String, Integer> entry : report.foodConsumed.entrySet()) {
         sendLine(
             client,
