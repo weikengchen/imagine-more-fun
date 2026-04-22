@@ -14,7 +14,7 @@ Design reference: `/Users/cusgadmin/Downloads/compass_artifact_wf-ccdf816b-1bc7-
 
 ## Stages
 
-### Stage 1 — Generator + chat display
+### Stage 1 — Generator + chat display ✅ shipped (0629029)
 - [x] `ImfStorage.nraDailyPlan()` path
 - [x] `DailyPlan` / `DailyPlanNode` POJOs (with `completed` field reserved for Stage 2)
 - [x] `DailyPlanStorage` load/save
@@ -24,6 +24,16 @@ Design reference: `/Users/cusgadmin/Downloads/compass_artifact_wf-ccdf816b-1bc7-
 - [x] `DailyPlanChatRenderer` — colored ASCII list
 
 **Done when**: `/rideplan` shows 5 random rides with ×2 next to each; returns same plan across relog within the day; new plan next day.
+
+**How to test Stage 1**
+1. Launch ImagineFun via Modrinth launcher; the new JAR is already deployed.
+2. Join any world/server — `/rideplan` is client-only and not gated to ImagineFun.
+3. Run `/rideplan`. Expect: gold divider, "Today's Ride Plan" header with date, 5 numbered rides with `×2` in cyan.
+4. Run `/rideplan` again. Expect: **identical** 5 rides (same file, same plan).
+5. Inspect `~/Library/Application Support/ModrinthApp/profiles/ImagineFun/config/imaginemorefun/nra-daily-plan.json` — should contain today's ISO date, epoch ms, a full `snapshotCounts` map, and 5-node list.
+6. Toggle `onlyAutograbbing` on in the mod config, **delete the plan file**, run `/rideplan`. Expect: rides drawn only from the autograbbing set.
+7. Roll the day: either delete the file or advance system clock past midnight, run `/rideplan`. Expect: fresh 5 rides and a new date in the file.
+8. Edge case: set `maxGoal` low, ride everything past it, delete plan. Expect: header says "No eligible rides".
 
 ### Stage 2 — Auto-completion + Tier-1 stamps
 - [ ] Hook `RideCountManager` delta detection
