@@ -84,7 +84,7 @@ public final class DailyPlanChatRenderer {
 
     if (layer.type == LayerType.SINGLE) {
       DailyPlanNode node = layer.nodes.get(0);
-      sendLine(client, buildNodeLine(indexStr, node, plan, counts));
+      sendLine(client, buildNodeLine(indexStr, node, layer, counts));
       return;
     }
 
@@ -104,17 +104,21 @@ public final class DailyPlanChatRenderer {
     }
     sendLine(client, header);
     for (DailyPlanNode node : layer.nodes) {
-      sendLine(client, buildNodeLine("      ", node, plan, counts));
+      sendLine(client, buildNodeLine("      ", node, layer, counts));
     }
   }
 
   private static Component buildNodeLine(
-      String prefix, DailyPlanNode node, DailyPlan plan, RideCountManager counts) {
+      String prefix, DailyPlanNode node, DailyPlanLayer layer, RideCountManager counts) {
     RideName ride = RideName.fromMatchString(node.ride);
-    Integer snap = plan.snapshotCounts == null ? null : plan.snapshotCounts.get(node.ride);
-    int baseline = snap == null ? 0 : snap;
-    int delta = Math.max(0, counts.getRideCount(ride) - baseline);
-    int progress = Math.min(delta, node.k);
+    int progress;
+    if (layer.baselineCounts != null) {
+      int baseline = layer.baselineCounts.getOrDefault(node.ride, 0);
+      int delta = Math.max(0, counts.getRideCount(ride) - baseline);
+      progress = Math.min(delta, node.k);
+    } else {
+      progress = 0;
+    }
 
     String glyph;
     int glyphColor;

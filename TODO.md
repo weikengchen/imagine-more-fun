@@ -84,6 +84,13 @@ Design reference: `/Users/cusgadmin/Downloads/compass_artifact_wf-ccdf816b-1bc7-
 7. `trackerDisplayMode=ONLY_WHEN_RIDING` → plan HUD hides when not riding, mirroring strategy behavior.
 8. All 5 nodes done → title flips green, chain is all-green `●`s.
 
+### Stage 4.6 — Gated layer progression ✅ shipped
+- [x] Tracker only looks at the first-incomplete ("active") layer; later layers are gated
+- [x] Per-layer `baselineCounts` captured at the moment the layer activates — rides done earlier don't bank toward it
+- [x] HUD / Screen / chat show `0/k` for future gated layers (visible but un-progressable)
+- [x] Completed/active layers keep their baseline so existing progress doesn't regress
+- [x] Migration: old plans without per-layer baselines seed active+earlier layers from `plan.snapshotCounts`
+
 ### Stage 4.5 — Generator tuning ✅ shipped
 - [x] Retired 2-of-3 capstone (layer type still handled for backward compat when loading old plans)
 - [x] `k` varies with ride duration: >10 min → 1; 5–10 min → 2 or 3; <5 min → 2–5

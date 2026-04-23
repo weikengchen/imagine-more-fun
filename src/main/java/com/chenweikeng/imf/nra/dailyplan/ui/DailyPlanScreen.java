@@ -249,23 +249,27 @@ public class DailyPlanScreen extends Screen {
     RideCountManager counts = RideCountManager.getInstance();
     int x = nodesX;
     for (DailyPlanNode node : layer.nodes) {
-      x = drawNodeBox(graphics, plan, counts, node, x, inner);
+      x = drawNodeBox(graphics, layer, counts, node, x, inner);
       x += NODE_GAP;
     }
   }
 
   private int drawNodeBox(
       GuiGraphics graphics,
-      DailyPlan plan,
+      DailyPlanLayer layer,
       RideCountManager counts,
       DailyPlanNode node,
       int left,
       int top) {
     RideName ride = RideName.fromMatchString(node.ride);
-    Integer snap = plan.snapshotCounts == null ? null : plan.snapshotCounts.get(node.ride);
-    int baseline = snap == null ? 0 : snap;
-    int delta = Math.max(0, counts.getRideCount(ride) - baseline);
-    int progress = Math.min(delta, node.k);
+    int progress;
+    if (layer.baselineCounts != null) {
+      int baseline = layer.baselineCounts.getOrDefault(node.ride, 0);
+      int delta = Math.max(0, counts.getRideCount(ride) - baseline);
+      progress = Math.min(delta, node.k);
+    } else {
+      progress = 0;
+    }
 
     String glyph;
     int glyphColor;

@@ -3,6 +3,7 @@ package com.chenweikeng.imf.nra.dailyplan;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * One step in the day's journey. A layer contains 1–3 nodes plus a {@link LayerType} that decides
@@ -12,6 +13,13 @@ public class DailyPlanLayer {
   public LayerType type;
   public List<DailyPlanNode> nodes;
   public boolean completed;
+
+  /**
+   * Per-ride baseline count captured the moment this layer became active. Null while the layer is
+   * still gated (earlier layer not yet complete). Progress = currentCount - baseline, so rides done
+   * before activation don't count.
+   */
+  public Map<String, Integer> baselineCounts;
 
   public DailyPlanLayer() {}
 

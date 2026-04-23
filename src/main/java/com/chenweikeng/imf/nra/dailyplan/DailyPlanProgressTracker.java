@@ -28,10 +28,23 @@ public final class DailyPlanProgressTracker {
     RideCountManager counts = RideCountManager.getInstance();
     boolean anyChanged = false;
 
-    for (int layerIdx = 0; layerIdx < plan.layers.size(); layerIdx++) {
-      DailyPlanLayer layer = plan.layers.get(layerIdx);
-      if (layer.completed) {
-        continue;
+    int activeIdx = -1;
+    for (int i = 0; i < plan.layers.size(); i++) {
+      if (!plan.layers.get(i).completed) {
+        activeIdx = i;
+        break;
+      }
+    }
+
+    if (activeIdx >= 0) {
+      DailyPlanLayer layer = plan.layers.get(activeIdx);
+      if (layer.baselineCounts == null) {
+        layer.baselineCounts = new java.util.HashMap<>();
+        for (DailyPlanNode node : layer.nodes) {
+          RideName r = RideName.fromMatchString(node.ride);
+          layer.baselineCounts.put(node.ride, counts.getRideCount(r));
+        }
+        anyChanged = true;
       }
 
       for (int nodeIdx = 0; nodeIdx < layer.nodes.size(); nodeIdx++) {
@@ -43,8 +56,7 @@ public final class DailyPlanProgressTracker {
         if (ride == RideName.UNKNOWN) {
           continue;
         }
-        Integer snap = plan.snapshotCounts == null ? null : plan.snapshotCounts.get(node.ride);
-        int baseline = snap == null ? 0 : snap;
+        int baseline = layer.baselineCounts.getOrDefault(node.ride, 0);
         int delta = counts.getRideCount(ride) - baseline;
 
         if (delta >= node.k) {
@@ -55,7 +67,7 @@ public final class DailyPlanProgressTracker {
       }
 
       if (layer.recomputeCompleted()) {
-        DailyPlanCelebration.layerCompleted(client, layerIdx + 1, layer.type);
+        DailyPlanCelebration.layerCompleted(client, activeIdx + 1, layer.type);
       }
     }
 

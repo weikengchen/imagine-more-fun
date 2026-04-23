@@ -251,7 +251,7 @@ public final class DailyPlanHudRenderer {
 
     int maxNodeWidth = column.badgeWidth;
     for (DailyPlanNode node : layer.nodes) {
-      NodeLayout n = buildNodeLayout(font, plan, counts, node);
+      NodeLayout n = buildNodeLayout(font, plan, counts, layer, node);
       column.nodes.add(n);
       maxNodeWidth = Math.max(maxNodeWidth, n.width);
     }
@@ -266,12 +266,21 @@ public final class DailyPlanHudRenderer {
   }
 
   private static NodeLayout buildNodeLayout(
-      Font font, DailyPlan plan, RideCountManager counts, DailyPlanNode node) {
+      Font font,
+      DailyPlan plan,
+      RideCountManager counts,
+      DailyPlanLayer layer,
+      DailyPlanNode node) {
     RideName ride = RideName.fromMatchString(node.ride);
-    Integer snap = plan.snapshotCounts == null ? null : plan.snapshotCounts.get(node.ride);
-    int baseline = snap == null ? 0 : snap;
-    int delta = Math.max(0, counts.getRideCount(ride) - baseline);
-    int progress = Math.min(delta, node.k);
+    int progress;
+    if (layer.baselineCounts != null) {
+      int baseline = layer.baselineCounts.getOrDefault(node.ride, 0);
+      int delta = Math.max(0, counts.getRideCount(ride) - baseline);
+      progress = Math.min(delta, node.k);
+    } else {
+      // Future / gated layer — show no progress until it activates.
+      progress = 0;
+    }
 
     NodeLayout layout = new NodeLayout();
     layout.isDone = node.completed;

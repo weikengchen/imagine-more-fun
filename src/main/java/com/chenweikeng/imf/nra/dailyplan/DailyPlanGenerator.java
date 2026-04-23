@@ -59,6 +59,11 @@ public final class DailyPlanGenerator {
     Random random = new Random();
     appendLayers(plan, eligible, random, INITIAL_LAYER_COUNT);
 
+    // Layer 0 is active from birth — give it a baseline equal to plan generation state.
+    if (!plan.layers.isEmpty()) {
+      plan.layers.get(0).baselineCounts = new java.util.HashMap<>(plan.snapshotCounts);
+    }
+
     return plan;
   }
 
