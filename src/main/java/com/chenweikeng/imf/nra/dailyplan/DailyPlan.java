@@ -11,11 +11,18 @@ public class DailyPlan {
 
   public long generatedAtEpochMs;
 
-  /** Snapshot of each ride's count at generation time (keyed by ride match name). Prospective */
-  /* credit counts deltas against this baseline. */
+  /** Snapshot of each ride's count at generation time (keyed by ride match name). */
   public Map<String, Integer> snapshotCounts = new HashMap<>();
 
-  public List<DailyPlanNode> nodes = new ArrayList<>();
+  /** Ordered list of layers. The plan auto-extends so the tail always has open work. */
+  public List<DailyPlanLayer> layers = new ArrayList<>();
+
+  /**
+   * Legacy field from Stage 1–3 plans (flat list of nodes, all singles). Populated only when
+   * deserialising an old-format JSON file; {@link DailyPlanManager} migrates these into SINGLE
+   * layers on load and clears this field.
+   */
+  @Deprecated public List<DailyPlanNode> nodes;
 
   public DailyPlan() {}
 }

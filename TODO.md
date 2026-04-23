@@ -84,10 +84,27 @@ Design reference: `/Users/cusgadmin/Downloads/compass_artifact_wf-ccdf816b-1bc7-
 7. `trackerDisplayMode=ONLY_WHEN_RIDING` → plan HUD hides when not riding, mirroring strategy behavior.
 8. All 5 nodes done → title flips green, chain is all-green `●`s.
 
-### Stage 4 — Generator v2: branching
-- [ ] OR nodes (~40%), one AND gate, one 2-of-3 capstone
-- [ ] Constraint solver: no repeat within 2 layers, novelty slot, AND k-symmetry
-- [ ] Update chat + HUD renderers for branches
+### Stage 4 — Branching layers + infinite chain ✅ shipped
+- [x] New `DailyPlanLayer` with `LayerType` (SINGLE / OR / AND / TWO_OF_THREE)
+- [x] Generator picks layer type with weighted roll (50% SINGLE, 35% OR, 12% AND, 3% 2-of-3); layer-0 is always SINGLE; every 3rd layer prefers an act-break
+- [x] "No ride repeats within last 2 layers" constraint
+- [x] **Infinite chain**: when unfinished layers fall below 3, `DailyPlanProgressTracker` calls `DailyPlanGenerator.appendLayers` to top up. A session never runs out.
+- [x] Per-layer completion rule: ALL (AND) / ANY (OR) / 2-of-3 / single
+- [x] Layer-level celebration (player-levelup, brighter text, 18 particles) on each layer flip
+- [x] Chat renderer groups layer nodes under a `[OR]` / `[AND]` / `[2/3]` header
+- [x] HUD renderer renders layer columns with vertical node stacks + `OR`/`AND`/`2/3` badge on top
+- [x] HUD sliding window (4 layers max) with `…` prefix/suffix when there's more off-screen
+- [x] Legacy plan migration: Stage 1–3 plans (`nodes` field only) auto-wrap into SINGLE layers on load
+
+**How to test Stage 4**
+1. Launch with new JAR. If you had a Stage-3 plan file, it auto-migrates to SINGLE layers. Delete it for a clean start.
+2. `/rideplan` → expect a mixed-type plan. Some layers should show `[OR]`, possibly `[AND]`, and by layer 3+ an act-break gate.
+3. HUD at the top shows up to 4 layers in a sliding window. Each branching layer has its badge above and nodes stacked below.
+4. Complete a node. If it's in an OR layer, the whole layer flips complete on the first done node — expect layer celebration: `[IMF] Layer [OR] 2 complete!` + levelup sound + 18 particles.
+5. Complete all nodes in an AND layer → that's when the layer flips.
+6. After a layer completes, the tail auto-extends. You should **never see the plan "finish"** — the JSON file grows and the HUD slides to keep showing the active layer.
+7. Check the JSON: `layers` array with each entry having `type`, `nodes[]`, `completed`. Size grows over the day.
+8. Set `onlyAutograbbing`, delete plan, relog → generator draws from autograb-only pool.
 
 ### Stage 5 — Screen UI
 - [ ] `DailyPlanScreen` with vertical L-bend layout
