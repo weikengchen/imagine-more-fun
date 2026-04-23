@@ -58,7 +58,8 @@ public final class DailyPlanHudRenderer {
   private static final int PANEL_H_PAD = 6;
   private static final int PANEL_TOP_PAD = 3;
   private static final int PANEL_BOTTOM_PAD = 4;
-  private static final int WINDOW_SIZE = 4;
+  private static final int WINDOW_SIZE = 5;
+  private static final int WINDOW_PRIOR = 2;
 
   private DailyPlanHudRenderer() {}
 
@@ -245,7 +246,7 @@ public final class DailyPlanHudRenderer {
         break;
       }
     }
-    int start = Math.max(0, active - 1);
+    int start = Math.max(0, active - WINDOW_PRIOR);
     int end = Math.min(total, start + WINDOW_SIZE);
     if (end - start < WINDOW_SIZE) {
       start = Math.max(0, end - WINDOW_SIZE);
