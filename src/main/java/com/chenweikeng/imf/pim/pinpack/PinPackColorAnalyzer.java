@@ -231,13 +231,15 @@ public final class PinPackColorAnalyzer {
     }
 
     // Normalize the display name to the canonical series key used in
-    // PinRarityHandler (no § codes, no "Pin Pack - " prefix, no " #N" suffix).
-    // e.g. "§5Pin Pack - Country Series #1" -> "Country Series"
+    // PinRarityHandler. Empirically the rarity DB keys the full variant name
+    // (e.g. "Country Series #1", "Tsum Tsum Series 1", "Pride Series"), so we
+    // only strip § codes and the optional "Pin Pack - " prefix. Do NOT strip
+    // a trailing " #N" — PinRarityHandler's keys include it.
     String name = ChatFormatting.stripFormatting(stack.getHoverName().getString());
     if (name.startsWith("Pin Pack - ")) {
       name = name.substring("Pin Pack - ".length());
     }
-    String seriesName = name.replaceAll(" #\\d+$", "");
+    String seriesName = name;
 
     PinRarityHandler.PinSeriesEntry seriesEntry =
         PinRarityHandler.getInstance().getSeriesEntry(seriesName);
