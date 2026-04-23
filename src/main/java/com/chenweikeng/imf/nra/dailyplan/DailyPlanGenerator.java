@@ -14,17 +14,32 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * Stage 4 generator: emits a list of {@link DailyPlanLayer}s with a mix of SINGLE/OR/AND/2-of-3
- * types, honouring a "no repeat within 2 layers" constraint. The plan is infinite — {@link
- * DailyPlanProgressTracker} calls {@link #appendLayers} to top up the tail as the player
- * progresses, so a session never runs out of next steps.
+ * Generator for {@link DailyPlan}s. Emits SINGLE / OR / AND layers (2-of-3 is retired) honouring a
+ * "no repeat within 2 layers" constraint. The plan is infinite — {@link DailyPlanProgressTracker}
+ * calls {@link #appendLayers} to top up the tail as the player progresses, so a session never runs
+ * out of next steps.
+ *
+ * <p>Ride {@code k} varies with ride duration:
+ *
+ * <ul>
+ *   <li>&gt; 10 min → k = 1
+ *   <li>5–10 min → k ∈ {2, 3}
+ *   <li>&lt; 5 min → k ∈ {2, 3, 4, 5}
+ * </ul>
+ *
+ * <p>Enchanted Tiki Room and Red Car Trolley are {@link #COMPANION_REQUIRED} and never appear as
+ * SINGLE-layer nodes — they only surface paired in OR/AND branches.
  */
 public final class DailyPlanGenerator {
   public static final int INITIAL_LAYER_COUNT = 5;
-  public static final int DEFAULT_K = 2;
   public static final int MIN_UNFINISHED_TAIL = 3;
 
   private static final int NO_REPEAT_WINDOW = 2;
+
+  /** Rides that must never appear as the sole node of a SINGLE layer. */
+  private static final Set<String> COMPANION_REQUIRED =
+      Set.of(
+          RideName.ENCHANTED_TIKI_ROOM.toMatchString(), RideName.RED_CAR_TROLLEY.toMatchString());
 
   private DailyPlanGenerator() {}
 
@@ -138,18 +153,52 @@ public final class DailyPlanGenerator {
     if (candidates.size() < wantNodes) {
       type = LayerType.SINGLE;
       wantNodes = 1;
-      if (candidates.isEmpty()) {
+    }
+
+    if (type == LayerType.SINGLE) {
+      List<RideName> singleCandidates = new ArrayList<>(candidates.size());
+      for (RideName ride : candidates) {
+        if (!COMPANION_REQUIRED.contains(ride.toMatchString())) {
+          singleCandidates.add(ride);
+        }
+      }
+      if (!singleCandidates.isEmpty()) {
+        Collections.shuffle(singleCandidates, random);
+        RideName pick = singleCandidates.get(0);
+        List<DailyPlanNode> nodes = new ArrayList<>(1);
+        nodes.add(new DailyPlanNode(pick.toMatchString(), chooseK(pick.getRideTime(), random)));
+        return new DailyPlanLayer(LayerType.SINGLE, nodes);
+      }
+      // All candidates are companion-required — bump to an OR pair.
+      if (candidates.size() < 2) {
         return null;
       }
+      type = LayerType.OR;
+      wantNodes = 2;
     }
 
     Collections.shuffle(candidates, random);
     List<DailyPlanNode> nodes = new ArrayList<>(wantNodes);
     for (int i = 0; i < wantNodes; i++) {
-      nodes.add(new DailyPlanNode(candidates.get(i).toMatchString(), DEFAULT_K));
+      RideName pick = candidates.get(i);
+      nodes.add(new DailyPlanNode(pick.toMatchString(), chooseK(pick.getRideTime(), random)));
     }
 
     return new DailyPlanLayer(type, nodes);
+  }
+
+  /**
+   * k by ride duration: &gt;10 min → 1, 5–10 min → 2 or 3, &lt;5 min → 2 through 5. Matches the
+   * "don't ask for 5 laps of Pirates" intuition.
+   */
+  private static int chooseK(int rideTimeSeconds, Random random) {
+    if (rideTimeSeconds > 600) {
+      return 1;
+    }
+    if (rideTimeSeconds >= 300) {
+      return 2 + random.nextInt(2); // 2 or 3
+    }
+    return 2 + random.nextInt(4); // 2..5
   }
 
   private static Set<String> ridesInLastLayers(List<DailyPlanLayer> existing, int windowSize) {
@@ -168,9 +217,9 @@ public final class DailyPlanGenerator {
       return LayerType.SINGLE;
     }
 
-    // Every 3rd layer after index 0 prefers an act-break (AND or 2/3).
+    // Every 3rd layer after index 0 is an act-break (AND).
     if (layerIndex % 3 == 0) {
-      return random.nextInt(100) < 25 ? LayerType.TWO_OF_THREE : LayerType.AND;
+      return LayerType.AND;
     }
 
     int roll = random.nextInt(100);
@@ -180,10 +229,7 @@ public final class DailyPlanGenerator {
     if (roll < 85) {
       return LayerType.OR;
     }
-    if (roll < 97) {
-      return LayerType.AND;
-    }
-    return LayerType.TWO_OF_THREE;
+    return LayerType.AND;
   }
 
   private static int nodeCountFor(LayerType type, Random random) {
@@ -191,7 +237,7 @@ public final class DailyPlanGenerator {
       case SINGLE -> 1;
       case OR -> random.nextBoolean() ? 2 : 3;
       case AND -> 2;
-      case TWO_OF_THREE -> 3;
+      case TWO_OF_THREE -> 3; // retired — still handled for backward compat with old plans
     };
   }
 }

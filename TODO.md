@@ -84,6 +84,11 @@ Design reference: `/Users/cusgadmin/Downloads/compass_artifact_wf-ccdf816b-1bc7-
 7. `trackerDisplayMode=ONLY_WHEN_RIDING` → plan HUD hides when not riding, mirroring strategy behavior.
 8. All 5 nodes done → title flips green, chain is all-green `●`s.
 
+### Stage 4.5 — Generator tuning ✅ shipped
+- [x] Retired 2-of-3 capstone (layer type still handled for backward compat when loading old plans)
+- [x] `k` varies with ride duration: >10 min → 1; 5–10 min → 2 or 3; <5 min → 2–5
+- [x] Enchanted Tiki Room + Red Car Trolley are companion-required — never surface as SINGLE-layer nodes, only in OR/AND branches
+
 ### Stage 4 — Branching layers + infinite chain ✅ shipped
 - [x] New `DailyPlanLayer` with `LayerType` (SINGLE / OR / AND / TWO_OF_THREE)
 - [x] Generator picks layer type with weighted roll (50% SINGLE, 35% OR, 12% AND, 3% 2-of-3); layer-0 is always SINGLE; every 3rd layer prefers an act-break
