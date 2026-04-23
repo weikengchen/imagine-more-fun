@@ -6,6 +6,7 @@ import com.chenweikeng.imf.pim.screen.PinRarityHandler;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.util.Set;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
@@ -209,7 +210,8 @@ public final class PinPackColorAnalyzer {
    * Gets the fill color for a pin pack in the shop based on series completion.
    *
    * @param stack The ItemStack to analyze (shop items have PIN_PACK NBT tag)
-   * @return COLOR_MAGENTA if series is complete, null otherwise
+   * @return COLOR_MAGENTA if the REQUIRED series is complete, COLOR_GREEN if it is still
+   *     incomplete, null for non-shop items or non-REQUIRED series.
    */
   public static Integer getShopPackColor(ItemStack stack) {
     if (stack.isEmpty()) {
@@ -228,16 +230,22 @@ public final class PinPackColorAnalyzer {
       return null;
     }
 
-    // Get the display name and strip "#N" suffix to get series name
-    // e.g., "Country Series #1" -> "Country Series"
-    String name = stack.getHoverName().getString();
+    // Normalize the display name to the canonical series key used in
+    // PinRarityHandler (no § codes, no "Pin Pack - " prefix, no " #N" suffix).
+    // e.g. "§5Pin Pack - Country Series #1" -> "Country Series"
+    String name = ChatFormatting.stripFormatting(stack.getHoverName().getString());
+    if (name.startsWith("Pin Pack - ")) {
+      name = name.substring("Pin Pack - ".length());
+    }
     String seriesName = name.replaceAll(" #\\d+$", "");
 
-    if (isSeriesComplete(seriesName)) {
-      return COLOR_MAGENTA;
+    PinRarityHandler.PinSeriesEntry seriesEntry =
+        PinRarityHandler.getInstance().getSeriesEntry(seriesName);
+    if (seriesEntry == null || seriesEntry.availability != PinRarityHandler.Availability.REQUIRED) {
+      return null;
     }
 
-    return null;
+    return isSeriesComplete(seriesName) ? COLOR_MAGENTA : COLOR_GREEN;
   }
 
   /**

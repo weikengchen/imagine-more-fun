@@ -9,6 +9,7 @@ import com.chenweikeng.imf.nra.config.profile.ProfileManager;
 import com.chenweikeng.imf.nra.config.profile.ui.ProfileManagementScreen;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlan;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanChatRenderer;
+import com.chenweikeng.imf.nra.dailyplan.DailyPlanHudRenderer;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanManager;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanProgressTracker;
 import com.chenweikeng.imf.nra.handler.AdvanceNoticeHandler;
@@ -137,6 +138,13 @@ public class NotRidingAlertClient implements ClientModInitializer {
     if (beforeChatId != null) {
       HudElementRegistry.attachElementBefore(
           VanillaHudElements.CHAT, beforeChatId, StrategyHudRendererDispatcher::render);
+    }
+
+    Identifier dailyPlanHudId =
+        Identifier.fromNamespaceAndPath(NotRidingAlertClient.MOD_ID, "daily_plan");
+    if (dailyPlanHudId != null) {
+      HudElementRegistry.attachElementBefore(
+          VanillaHudElements.CHAT, dailyPlanHudId, DailyPlanHudRenderer::render);
     }
 
     Identifier sessionStatsId =

@@ -8,8 +8,7 @@ import com.chenweikeng.imf.nra.tracker.PlayerMovementTracker;
 import net.minecraft.client.Minecraft;
 
 public class AutograbFailureHandler {
-  private static final int AUTOGRAB_TIMEOUT_TICKS = 600;
-  private static final int AUTOGRAB_DLRR_TIMEOUT_TICKS = 1200;
+  private static final int AUTOGRAB_TIMEOUT_TICKS = 1200;
 
   private long autograbRegionEntryTick = -1;
   private RideName currentAutograbRegion = null;
@@ -33,12 +32,8 @@ public class AutograbFailureHandler {
         autograbFailureAlertActive = false;
       }
 
-      int timeoutTicks =
-          autograbRide == RideName.DISNEYLAND_RAILROAD
-              ? AUTOGRAB_DLRR_TIMEOUT_TICKS
-              : AUTOGRAB_TIMEOUT_TICKS;
-
-      if (autograbRegionEntryTick >= 0 && currentTick - autograbRegionEntryTick >= timeoutTicks) {
+      if (autograbRegionEntryTick >= 0
+          && currentTick - autograbRegionEntryTick >= AUTOGRAB_TIMEOUT_TICKS) {
         autograbFailureAlertActive = true;
       }
     } else {

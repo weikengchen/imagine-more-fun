@@ -12,11 +12,12 @@ public final class WindowMinimizeHandler {
   // Monitor for 15 seconds (300 ticks @ 20tps) after each restore; long enough
   // to catch a click-induced resize/iconify but short enough to avoid log spam.
   private static final int MONITOR_TICKS = 300;
-  // Dock-thumbnail-sized frames look like <100px wide on macOS. If GLFW hands
-  // us anything below this during the post-restore grace window, assume the
-  // deminiaturize animation reported a bogus frame and force the pre-minimize
-  // geometry back.
-  private static final int SHRINK_THRESHOLD_PX = 200;
+  // If GLFW hands us a frame this small in either axis during the post-restore
+  // grace window, assume something (deminiaturize animation frame, window-snap
+  // to narrow strip, etc.) bogusly shrank us and force the pre-minimize
+  // geometry back. 500 comfortably covers both the ~73x175 dock-thumbnail case
+  // and the ~208x1022 narrow-strip snap we've seen in practice.
+  private static final int SHRINK_THRESHOLD_PX = 500;
 
   private int monitorTicksLeft = 0;
   private int lastW = -1;

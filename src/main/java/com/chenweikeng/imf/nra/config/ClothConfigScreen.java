@@ -149,6 +149,16 @@ public class ClothConfigScreen {
             .setSaveConsumer(newValue -> profile.randomRideOverride = newValue)
             .build());
 
+    general.addEntry(
+        entryBuilder
+            .startBooleanToggle(
+                Component.translatable("config.not-riding-alert.showDailyPlanHud"),
+                profile.showDailyPlanHud)
+            .setDefaultValue(ConfigDefaults.SHOW_DAILY_PLAN_HUD)
+            .setTooltip(Component.translatable("config.not-riding-alert.showDailyPlanHud.tooltip"))
+            .setSaveConsumer(newValue -> profile.showDailyPlanHud = newValue)
+            .build());
+
     ConfigCategory visual =
         builder.getOrCreateCategory(
             Component.translatable("config.not-riding-alert.category.visual"));

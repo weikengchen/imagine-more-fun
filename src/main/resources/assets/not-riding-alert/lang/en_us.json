@@ -119,5 +119,7 @@
   "config.not-riding-alert.rideReportNotifyMode.never": "Never",
   "config.not-riding-alert.randomRideOverride": "Override /randomride with goal-aware warp",
   "config.not-riding-alert.randomRideOverride.tooltip": "When enabled, /randomride picks a random ride you still have an ongoing goal on and warps you there via /w. Falls back to the server's /randomride if you have no remaining goals.",
+  "config.not-riding-alert.showDailyPlanHud": "Show Daily Ride Plan HUD",
+  "config.not-riding-alert.showDailyPlanHud.tooltip": "Draw today's ride plan as a horizontal tree at the top of the screen. When on, the strategy HUD is hidden to make room.",
   "options.nra.openaudiomc_volume": "OpenAudioMc Volume"
 }

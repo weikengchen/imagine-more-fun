@@ -3,6 +3,7 @@ package com.chenweikeng.imf.nra.strategy;
 import com.chenweikeng.imf.nra.config.ModConfig;
 import com.chenweikeng.imf.nra.config.StrategyHudRendererVersion;
 import com.chenweikeng.imf.nra.config.TrackerDisplayMode;
+import com.chenweikeng.imf.nra.dailyplan.DailyPlanHudRenderer;
 import com.chenweikeng.imf.nra.ride.AutograbHolder;
 import com.chenweikeng.imf.nra.ride.CurrentRideHolder;
 import com.chenweikeng.imf.nra.ride.RideCountManager;
@@ -123,6 +124,9 @@ public class StrategyHudRendererDispatcher {
   }
 
   public static void render(GuiGraphics context, DeltaTracker tickCounter) {
+    if (DailyPlanHudRenderer.isActive()) {
+      return;
+    }
     TrackerDisplayMode mode = ModConfig.currentSetting.trackerDisplayMode;
     if (mode == TrackerDisplayMode.NEVER) {
       return;

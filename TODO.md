@@ -54,10 +54,23 @@ Design reference: `/Users/cusgadmin/Downloads/compass_artifact_wf-ccdf816b-1bc7-
 5. Complete all 5 nodes → expect extra "Daily Ride Plan complete!" line + level-up sound + 24 particles.
 6. Relog mid-way → completed nodes persist; progress on incomplete nodes comes from live count delta against the saved snapshot.
 
-### Stage 3 — HUD breadcrumb
-- [ ] Register `imaginemorefun:daily_plan` HUD layer above hotbar
-- [ ] Single-line render: `⊙─⊙─●─○─○  next: Pirates ×2`
-- [ ] Config toggle (default on)
+### Stage 3 — Top-of-screen tree HUD ✅ shipped
+- [x] Register `imaginemorefun:daily_plan` HUD layer (attached before CHAT, same as strategy)
+- [x] Horizontal left-to-right chain at top of screen: title + centered node chain
+- [x] Each node = glyph (●/◐/○) + ride short name + `m/k` progress, connectors `──` between
+- [x] Replaces the strategy HUD while active (strategy dispatcher early-returns when plan HUD is active)
+- [x] Config toggle `showDailyPlanHud` (default on) under General
+- [x] Respects existing `trackerDisplayMode` + boss-bar suppression (inherits strategy HUD's gating)
+
+**How to test Stage 3**
+1. Join ImagineFun with new JAR.
+2. Expect top-of-screen row: `✨ Ride Plan · Thu Apr 23 · 0/5` (gold), below it a centered chain `○ ALICE 0/2 ── ○ BTM 0/2 ──` … with untouched nodes in gray.
+3. Ride one ride once → chain updates: `◐ ALICE 1/2` in orange. Ride twice → bell + particles fire, chain line flips `● ALICE ×2` in green.
+4. Strategy HUD should no longer be visible while plan HUD is showing.
+5. Open Cloth config → General → toggle "Show Daily Ride Plan HUD" off → strategy HUD returns, plan HUD vanishes.
+6. Summon a boss (or any vanilla boss bar) → plan HUD hides cleanly.
+7. `trackerDisplayMode=ONLY_WHEN_RIDING` → plan HUD hides when not riding, mirroring strategy behavior.
+8. All 5 nodes done → title flips green, chain is all-green `●`s.
 
 ### Stage 4 — Generator v2: branching
 - [ ] OR nodes (~40%), one AND gate, one 2-of-3 capstone
