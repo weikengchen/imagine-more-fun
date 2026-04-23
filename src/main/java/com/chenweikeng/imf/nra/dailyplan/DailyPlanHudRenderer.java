@@ -30,15 +30,23 @@ public final class DailyPlanHudRenderer {
   private static final int COLOR_PROGRESS = 0xFFFFAA00;
   private static final int COLOR_IDLE = 0xFFFFFFFF;
   private static final int COLOR_IDLE_GLYPH = 0xFF888888;
-  private static final int COLOR_CONNECTOR = 0xFF666666;
+  private static final int COLOR_CONNECTOR = 0xFF555555;
+
+  private static final int PANEL_BG = 0xB0000000;
+  private static final int NODE_BG = 0x60000000;
 
   private static final String GLYPH_DONE = "\u25CF";
   private static final String GLYPH_PROGRESS = "\u25D0";
   private static final String GLYPH_IDLE = "\u25CB";
-  private static final String CONNECTOR = " \u2500\u2500 ";
 
-  private static final int TOP_PADDING = 2;
-  private static final int LINE_HEIGHT = 10;
+  private static final int FONT_HEIGHT = 9;
+  private static final int NODE_H_PAD = 4;
+  private static final int NODE_V_PAD = 3;
+  private static final int NODE_HEIGHT = FONT_HEIGHT * 2 + NODE_V_PAD * 2 + 1;
+  private static final int CONNECTOR_WIDTH = 14;
+  private static final int PANEL_H_PAD = 6;
+  private static final int PANEL_TOP_PAD = 3;
+  private static final int PANEL_BOTTOM_PAD = 4;
 
   private DailyPlanHudRenderer() {}
 
@@ -116,15 +124,52 @@ public final class DailyPlanHudRenderer {
             + total;
     int titleColor = allDone ? COLOR_DONE : COLOR_TITLE;
     int titleWidth = font.width(title);
+
+    List<NodeLayout> layouts = buildLayouts(font, plan);
+
+    int chainWidth = 0;
+    for (int i = 0; i < layouts.size(); i++) {
+      chainWidth += layouts.get(i).width;
+      if (i < layouts.size() - 1) {
+        chainWidth += CONNECTOR_WIDTH;
+      }
+    }
+
+    int panelInnerWidth = Math.max(chainWidth, titleWidth);
+    int panelWidth = panelInnerWidth + PANEL_H_PAD * 2;
+    int panelHeight = PANEL_TOP_PAD + FONT_HEIGHT + 3 + NODE_HEIGHT + PANEL_BOTTOM_PAD;
+    int panelX = (screenWidth - panelWidth) / 2;
+    int panelY = 0;
+
+    context.fill(panelX, panelY, panelX + panelWidth, panelY + panelHeight, PANEL_BG);
+
     int titleX = (screenWidth - titleWidth) / 2;
-    context.drawString(font, title, titleX, TOP_PADDING, titleColor, false);
+    int titleY = panelY + PANEL_TOP_PAD;
+    context.drawString(font, title, titleX, titleY, titleColor, false);
 
+    int chainStartX = (screenWidth - chainWidth) / 2;
+    int boxTopY = titleY + FONT_HEIGHT + 3;
+    int boxCenterY = boxTopY + NODE_HEIGHT / 2;
+
+    int x = chainStartX;
+    for (int i = 0; i < layouts.size(); i++) {
+      NodeLayout layout = layouts.get(i);
+      drawNodeBox(context, font, layout, x, boxTopY);
+      x += layout.width;
+
+      if (i < layouts.size() - 1) {
+        int connColor = layout.isDone ? COLOR_DONE : COLOR_CONNECTOR;
+        drawConnector(context, x, boxCenterY, x + CONNECTOR_WIDTH, connColor);
+        x += CONNECTOR_WIDTH;
+      }
+    }
+  }
+
+  private static List<NodeLayout> buildLayouts(Font font, DailyPlan plan) {
     RideCountManager counts = RideCountManager.getInstance();
-    List<NodeSegment> segments = new ArrayList<>(plan.nodes.size());
-    int totalChainWidth = 0;
+    List<NodeLayout> out = new ArrayList<>(plan.nodes.size());
 
-    for (int i = 0; i < plan.nodes.size(); i++) {
-      DailyPlanNode node = plan.nodes.get(i);
+    for (DailyPlanNode node : plan.nodes) {
       RideName ride = RideName.fromMatchString(node.ride);
 
       Integer snap = plan.snapshotCounts == null ? null : plan.snapshotCounts.get(node.ride);
@@ -132,64 +177,74 @@ public final class DailyPlanHudRenderer {
       int delta = Math.max(0, counts.getRideCount(ride) - baseline);
       int progress = Math.min(delta, node.k);
 
-      String glyph;
-      int glyphColor;
-      int textColor;
-      if (node.completed) {
-        glyph = GLYPH_DONE;
-        glyphColor = COLOR_DONE;
-        textColor = COLOR_DONE;
-      } else if (progress > 0) {
-        glyph = GLYPH_PROGRESS;
-        glyphColor = COLOR_PROGRESS;
-        textColor = COLOR_IDLE;
+      NodeLayout layout = new NodeLayout();
+      layout.isDone = node.completed;
+      boolean isPartial = !layout.isDone && progress > 0;
+
+      if (layout.isDone) {
+        layout.glyph = GLYPH_DONE;
+        layout.glyphColor = COLOR_DONE;
+        layout.nameColor = COLOR_DONE;
+        layout.progColor = COLOR_DONE;
+        layout.borderColor = COLOR_DONE;
+      } else if (isPartial) {
+        layout.glyph = GLYPH_PROGRESS;
+        layout.glyphColor = COLOR_PROGRESS;
+        layout.nameColor = COLOR_IDLE;
+        layout.progColor = COLOR_PROGRESS;
+        layout.borderColor = COLOR_PROGRESS;
       } else {
-        glyph = GLYPH_IDLE;
-        glyphColor = COLOR_IDLE_GLYPH;
-        textColor = COLOR_IDLE;
+        layout.glyph = GLYPH_IDLE;
+        layout.glyphColor = COLOR_IDLE_GLYPH;
+        layout.nameColor = COLOR_IDLE;
+        layout.progColor = COLOR_DIM;
+        layout.borderColor = COLOR_IDLE_GLYPH;
       }
 
-      String name = ride.getShortName().toUpperCase(Locale.ENGLISH);
-      String prog = node.completed ? ("\u00D7" + node.k) : (progress + "/" + node.k);
+      layout.name = ride.getShortName().toUpperCase(Locale.ENGLISH);
+      layout.prog = layout.isDone ? ("\u00D7" + node.k) : (progress + "/" + node.k);
 
-      int glyphWidth = font.width(glyph + " ");
-      int nameWidth = font.width(name + " ");
-      int progWidth = font.width(prog);
+      String topRow = layout.glyph + " " + layout.name;
+      int topWidth = font.width(topRow);
+      int botWidth = font.width(layout.prog);
+      layout.width = Math.max(topWidth, botWidth) + NODE_H_PAD * 2;
+      layout.topRow = topRow;
+      layout.topRowWidth = topWidth;
+      layout.botRowWidth = botWidth;
+      layout.glyphWidth = font.width(layout.glyph + " ");
 
-      NodeSegment seg = new NodeSegment();
-      seg.glyph = glyph;
-      seg.glyphColor = glyphColor;
-      seg.text = name + " " + prog;
-      seg.textColor = textColor;
-      seg.progressColor = node.completed ? COLOR_DONE : (progress > 0 ? COLOR_PROGRESS : COLOR_DIM);
-      seg.name = name;
-      seg.prog = prog;
-      seg.width = glyphWidth + nameWidth + progWidth;
-
-      segments.add(seg);
-      totalChainWidth += seg.width;
-      if (i < plan.nodes.size() - 1) {
-        totalChainWidth += font.width(CONNECTOR);
-      }
+      out.add(layout);
     }
 
-    int chainX = (screenWidth - totalChainWidth) / 2;
-    int chainY = TOP_PADDING + LINE_HEIGHT + 2;
+    return out;
+  }
 
-    int x = chainX;
-    for (int i = 0; i < segments.size(); i++) {
-      NodeSegment seg = segments.get(i);
-      context.drawString(font, seg.glyph + " ", x, chainY, seg.glyphColor, false);
-      x += font.width(seg.glyph + " ");
-      context.drawString(font, seg.name + " ", x, chainY, seg.textColor, false);
-      x += font.width(seg.name + " ");
-      context.drawString(font, seg.prog, x, chainY, seg.progressColor, false);
-      x += font.width(seg.prog);
-      if (i < segments.size() - 1) {
-        context.drawString(font, CONNECTOR, x, chainY, COLOR_CONNECTOR, false);
-        x += font.width(CONNECTOR);
-      }
-    }
+  private static void drawNodeBox(
+      GuiGraphics context, Font font, NodeLayout layout, int left, int top) {
+    int right = left + layout.width;
+    int bottom = top + NODE_HEIGHT;
+
+    context.fill(left, top, right, bottom, NODE_BG);
+    context.hLine(left, right - 1, top, layout.borderColor);
+    context.hLine(left, right - 1, bottom - 1, layout.borderColor);
+    context.vLine(left, top, bottom - 1, layout.borderColor);
+    context.vLine(right - 1, top, bottom - 1, layout.borderColor);
+
+    int topRowStartX = left + (layout.width - layout.topRowWidth) / 2;
+    int topRowY = top + NODE_V_PAD;
+    context.drawString(font, layout.glyph + " ", topRowStartX, topRowY, layout.glyphColor, false);
+    context.drawString(
+        font, layout.name, topRowStartX + layout.glyphWidth, topRowY, layout.nameColor, false);
+
+    int botRowX = left + (layout.width - layout.botRowWidth) / 2;
+    int botRowY = topRowY + FONT_HEIGHT + 1;
+    context.drawString(font, layout.prog, botRowX, botRowY, layout.progColor, false);
+  }
+
+  private static void drawConnector(
+      GuiGraphics context, int left, int centerY, int right, int color) {
+    context.hLine(left, right - 1, centerY - 1, color);
+    context.hLine(left, right - 1, centerY, color);
   }
 
   private static String formatDateFriendly(String dateStr) {
@@ -205,14 +260,19 @@ public final class DailyPlanHudRenderer {
     }
   }
 
-  private static final class NodeSegment {
+  private static final class NodeLayout {
     String glyph;
     int glyphColor;
-    String text;
-    int textColor;
-    int progressColor;
     String name;
+    int nameColor;
     String prog;
+    int progColor;
+    int borderColor;
+    boolean isDone;
     int width;
+    String topRow;
+    int topRowWidth;
+    int botRowWidth;
+    int glyphWidth;
   }
 }

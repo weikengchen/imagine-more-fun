@@ -62,6 +62,13 @@ Design reference: `/Users/cusgadmin/Downloads/compass_artifact_wf-ccdf816b-1bc7-
 - [x] Config toggle `showDailyPlanHud` (default on) under General
 - [x] Respects existing `trackerDisplayMode` + boss-bar suppression (inherits strategy HUD's gating)
 
+### Stage 3.5 — Tree-like boxes + backdrop ✅ shipped
+- [x] Semi-transparent panel (`0xB0000000`) behind the whole HUD for contrast against gameplay
+- [x] Each node rendered as a bordered box (filled `0x60000000` + 1px border in status color)
+- [x] Two rows inside each box: `● NAME` top, `m/k` bottom, both centered
+- [x] Proper horizontal connector lines (2px thick, drawn via `hLine`) between node boxes
+- [x] Connector line colored green when the source node is complete — "energized skill-tree" feel
+
 **How to test Stage 3**
 1. Join ImagineFun with new JAR.
 2. Expect top-of-screen row: `✨ Ride Plan · Thu Apr 23 · 0/5` (gold), below it a centered chain `○ ALICE 0/2 ── ○ BTM 0/2 ──` … with untouched nodes in gray.
