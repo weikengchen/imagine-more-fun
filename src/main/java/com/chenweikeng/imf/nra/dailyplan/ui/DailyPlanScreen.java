@@ -1,6 +1,7 @@
 package com.chenweikeng.imf.nra.dailyplan.ui;
 
 import com.chenweikeng.imf.nra.dailyplan.DailyPlan;
+import com.chenweikeng.imf.nra.dailyplan.DailyPlanHudRenderer;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanLayer;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanLayer.LayerType;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanManager;
@@ -114,11 +115,14 @@ public class DailyPlanScreen extends Screen {
     graphics.enableScissor(panelLeft + 2, listTop, panelRight - 2, listBottom);
 
     int activeIdx = firstIncompleteIndex(plan);
+    RideName highlightRide =
+        this.minecraft == null ? null : DailyPlanHudRenderer.currentOrAutograbRide(this.minecraft);
 
     int y = listTop - scrollOffset;
     for (int i = 0; i < plan.layers.size(); i++) {
       int rowBottom = y + ROW_HEIGHT;
       if (rowBottom >= listTop && y <= listBottom) {
+        RideName highlightForRow = (i == activeIdx) ? highlightRide : null;
         renderLayerRow(
             graphics,
             plan,
@@ -127,7 +131,8 @@ public class DailyPlanScreen extends Screen {
             panelLeft + 10,
             y,
             panelRight - 10,
-            i == activeIdx);
+            i == activeIdx,
+            highlightForRow);
       }
       y += ROW_HEIGHT;
     }
@@ -207,7 +212,8 @@ public class DailyPlanScreen extends Screen {
       int left,
       int top,
       int right,
-      boolean isActive) {
+      boolean isActive,
+      RideName highlightRide) {
     if (isActive) {
       graphics.fill(left - 6, top, right + 6, top + ROW_HEIGHT, ACTIVE_ROW_BG);
     }
@@ -249,7 +255,7 @@ public class DailyPlanScreen extends Screen {
     RideCountManager counts = RideCountManager.getInstance();
     int x = nodesX;
     for (DailyPlanNode node : layer.nodes) {
-      x = drawNodeBox(graphics, layer, counts, node, x, inner);
+      x = drawNodeBox(graphics, layer, counts, node, x, inner, highlightRide);
       x += NODE_GAP;
     }
   }
@@ -260,7 +266,8 @@ public class DailyPlanScreen extends Screen {
       RideCountManager counts,
       DailyPlanNode node,
       int left,
-      int top) {
+      int top,
+      RideName highlightRide) {
     RideName ride = RideName.fromMatchString(node.ride);
     int progress;
     if (layer.baselineCounts != null) {
@@ -298,6 +305,11 @@ public class DailyPlanScreen extends Screen {
 
     String displayName = ride.getDisplayName();
     String progText = node.completed ? ("\u00D7" + node.k) : (progress + "/" + node.k);
+
+    boolean blink = highlightRide != null && !node.completed && ride == highlightRide;
+    if (blink) {
+      borderColor = DailyPlanHudRenderer.blinkBorderColor();
+    }
 
     String topLine = glyph + " " + displayName;
     int topWidth = this.font.width(topLine);

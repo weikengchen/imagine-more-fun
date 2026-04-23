@@ -84,6 +84,11 @@ Design reference: `/Users/cusgadmin/Downloads/compass_artifact_wf-ccdf816b-1bc7-
 7. `trackerDisplayMode=ONLY_WHEN_RIDING` → plan HUD hides when not riding, mirroring strategy behavior.
 8. All 5 nodes done → title flips green, chain is all-green `●`s.
 
+### Stage 4.7 — Blink active-ride node ✅ shipped
+- [x] When the player is on (or autograbbing) a ride that matches an uncompleted node in the **active** layer, that node's border pulses blue (1 sec sine, dim → bright cyan)
+- [x] Applies to HUD and full-window Screen
+- [x] Future-layer nodes never blink (gating still rules)
+
 ### Stage 4.6 — Gated layer progression ✅ shipped
 - [x] Tracker only looks at the first-incomplete ("active") layer; later layers are gated
 - [x] Per-layer `baselineCounts` captured at the moment the layer activates — rides done earlier don't bank toward it

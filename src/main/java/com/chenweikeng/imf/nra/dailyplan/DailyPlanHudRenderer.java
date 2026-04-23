@@ -129,11 +129,15 @@ public final class DailyPlanHudRenderer {
     boolean hasLeftEllipsis = window.start > 0;
     boolean hasRightEllipsis = window.end < plan.layers.size();
 
+    int activeIdx = activeLevel(plan) - 1;
+    RideName highlightRide = currentOrAutograbRide(client);
+
     List<LayerColumn> columns = new ArrayList<>();
     int maxBadgeHeight = 0;
     int maxBelowHeight = 0;
     for (int i = window.start; i < window.end; i++) {
-      LayerColumn column = buildLayerColumn(font, plan, i);
+      RideName highlightForLayer = (i == activeIdx) ? highlightRide : null;
+      LayerColumn column = buildLayerColumn(font, plan, i, highlightForLayer);
       columns.add(column);
       if (column.badge != null) {
         maxBadgeHeight = BADGE_HEIGHT;
@@ -240,7 +244,8 @@ public final class DailyPlanHudRenderer {
     return new WindowRange(start, end);
   }
 
-  private static LayerColumn buildLayerColumn(Font font, DailyPlan plan, int layerIdx) {
+  private static LayerColumn buildLayerColumn(
+      Font font, DailyPlan plan, int layerIdx, RideName highlightRide) {
     DailyPlanLayer layer = plan.layers.get(layerIdx);
     RideCountManager counts = RideCountManager.getInstance();
 
@@ -251,7 +256,7 @@ public final class DailyPlanHudRenderer {
 
     int maxNodeWidth = column.badgeWidth;
     for (DailyPlanNode node : layer.nodes) {
-      NodeLayout n = buildNodeLayout(font, plan, counts, layer, node);
+      NodeLayout n = buildNodeLayout(font, plan, counts, layer, node, highlightRide);
       column.nodes.add(n);
       maxNodeWidth = Math.max(maxNodeWidth, n.width);
     }
@@ -270,7 +275,8 @@ public final class DailyPlanHudRenderer {
       DailyPlan plan,
       RideCountManager counts,
       DailyPlanLayer layer,
-      DailyPlanNode node) {
+      DailyPlanNode node,
+      RideName highlightRide) {
     RideName ride = RideName.fromMatchString(node.ride);
     int progress;
     if (layer.baselineCounts != null) {
@@ -284,6 +290,7 @@ public final class DailyPlanHudRenderer {
 
     NodeLayout layout = new NodeLayout();
     layout.isDone = node.completed;
+    layout.blink = highlightRide != null && !layout.isDone && ride == highlightRide;
     boolean isPartial = !layout.isDone && progress > 0;
 
     if (layout.isDone) {
@@ -342,11 +349,13 @@ public final class DailyPlanHudRenderer {
     int right = left + layout.width;
     int bottom = top + NODE_HEIGHT;
 
+    int borderColor = layout.blink ? blinkBorderColor() : layout.borderColor;
+
     context.fill(left, top, right, bottom, NODE_BG);
-    context.hLine(left, right - 1, top, layout.borderColor);
-    context.hLine(left, right - 1, bottom - 1, layout.borderColor);
-    context.vLine(left, top, bottom - 1, layout.borderColor);
-    context.vLine(right - 1, top, bottom - 1, layout.borderColor);
+    context.hLine(left, right - 1, top, borderColor);
+    context.hLine(left, right - 1, bottom - 1, borderColor);
+    context.vLine(left, top, bottom - 1, borderColor);
+    context.vLine(right - 1, top, bottom - 1, borderColor);
 
     int topRowStartX = left + (layout.width - layout.topRowWidth) / 2;
     int topRowY = top + NODE_V_PAD;
@@ -363,6 +372,35 @@ public final class DailyPlanHudRenderer {
       GuiGraphics context, int left, int centerY, int right, int color) {
     context.hLine(left, right - 1, centerY - 1, color);
     context.hLine(left, right - 1, centerY, color);
+  }
+
+  /**
+   * Time-pulsed cyan-blue border for nodes matching the ride the player is currently on. 1 second
+   * period; lerps between a dim blue and a bright cyan. Recomputed every frame.
+   */
+  public static int blinkBorderColor() {
+    long now = System.currentTimeMillis();
+    double phase = (now % 1000L) / 1000.0;
+    double pulse = 0.5 + 0.5 * Math.sin(phase * 2 * Math.PI);
+    int r = (int) (0x33 + (0x88 - 0x33) * pulse);
+    int g = (int) (0x77 + (0xCC - 0x77) * pulse);
+    int b = (int) (0xCC + (0xFF - 0xCC) * pulse);
+    return 0xFF000000 | (r << 16) | (g << 8) | b;
+  }
+
+  /** The ride the player is actively on (or autograbbing into), or null. */
+  public static RideName currentOrAutograbRide(Minecraft client) {
+    RideName currentRide = CurrentRideHolder.getCurrentRide();
+    if (currentRide != null) {
+      return currentRide;
+    }
+    RideName autograbRide = AutograbHolder.getRideAtLocation(client);
+    if (autograbRide != null
+        && client.player != null
+        && !GameState.getInstance().isValidPassenger(client.player)) {
+      return autograbRide;
+    }
+    return null;
   }
 
   private static RidingStatus buildRidingStatus(Minecraft client) {
@@ -435,6 +473,7 @@ public final class DailyPlanHudRenderer {
     int progColor;
     int borderColor;
     boolean isDone;
+    boolean blink;
     int width;
     int topRowWidth;
     int botRowWidth;
