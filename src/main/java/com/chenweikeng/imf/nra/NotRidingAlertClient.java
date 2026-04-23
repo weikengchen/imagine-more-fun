@@ -10,8 +10,10 @@ import com.chenweikeng.imf.nra.config.profile.ui.ProfileManagementScreen;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlan;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanChatRenderer;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanHudRenderer;
+import com.chenweikeng.imf.nra.dailyplan.DailyPlanKeybind;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanManager;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanProgressTracker;
+import com.chenweikeng.imf.nra.dailyplan.ui.DailyPlanScreen;
 import com.chenweikeng.imf.nra.handler.AdvanceNoticeHandler;
 import com.chenweikeng.imf.nra.handler.AutograbFailureHandler;
 import com.chenweikeng.imf.nra.handler.AutograbRegionRenderer;
@@ -88,6 +90,7 @@ public class NotRidingAlertClient implements ClientModInitializer {
     LOGGER.info("Not Riding Alert client initialized");
     MonkeycraftCompat.init();
     AutograbRegionRenderer.register();
+    DailyPlanKeybind.register();
 
     ClientPlayConnectionEvents.JOIN.register(
         (handler, sender, client) -> {
@@ -116,6 +119,7 @@ public class NotRidingAlertClient implements ClientModInitializer {
         });
 
     ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
+    ClientTickEvents.END_CLIENT_TICK.register(client -> DailyPlanKeybind.tick());
 
     ClientCommandRegistrationCallback.EVENT.register(
         (dispatcher, registryAccess) -> {
@@ -356,7 +360,16 @@ public class NotRidingAlertClient implements ClientModInitializer {
                         DailyPlanChatRenderer.send(client, plan);
                       });
                   return 1;
-                }));
+                })
+            .then(
+                ClientCommandManager.literal("open")
+                    .executes(
+                        context -> {
+                          Minecraft client = Minecraft.getInstance();
+                          client.execute(
+                              () -> client.setScreen(new DailyPlanScreen(client.screen)));
+                          return 1;
+                        })));
   }
 
   private static void registerRideReportCommand(

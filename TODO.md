@@ -106,11 +106,25 @@ Design reference: `/Users/cusgadmin/Downloads/compass_artifact_wf-ccdf816b-1bc7-
 7. Check the JSON: `layers` array with each entry having `type`, `nodes[]`, `completed`. Size grows over the day.
 8. Set `onlyAutograbbing`, delete plan, relog → generator draws from autograb-only pool.
 
-### Stage 5 — Screen UI
-- [ ] `DailyPlanScreen` with vertical L-bend layout
-- [ ] States: locked / available / in-progress / complete
-- [ ] `J` keybind + `/rideplan open`
-- [ ] Sprite atlas at `assets/imaginemorefun/textures/gui/tree_icons.png`
+### Stage 5 — Screen UI ✅ shipped
+- [x] `DailyPlanScreen` — full-window scrollable vertical list of all layers
+- [x] Header with title + date + completed/total layer count + riding countdown (if riding)
+- [x] Each layer row: `Layer N` label, status glyph (✓ / ▶ active / · idle), optional `[OR]/[AND]/[2/3]` badge, horizontal node boxes
+- [x] Active layer row highlighted with a translucent background
+- [x] Mouse wheel scroll + arrow keys / page up/down; scroll hint indicators on header/footer
+- [x] `/rideplan open` subcommand and `J` keybind (Fabric-registered, user-rebindable under the ImagineMoreFun category)
+- [x] ESC / "Close" button returns to parent screen
+- [ ] Deferred: sprite atlas for ride icons — stays text-based for now
+
+**How to test Stage 5**
+1. Launch ImagineFun with the new JAR.
+2. Run `/rideplan open` or press **J** → full-window Daily Ride Plan opens.
+3. Header shows title + date + `n/m layers` + riding info (if riding).
+4. Each layer appears as a row with its number, status glyph, type badge (if branching), and all nodes as side-by-side boxes.
+5. Active layer has a faint white highlight bar.
+6. Mouse-wheel scroll, arrow keys, or Page Up/Down to browse. Scroll hints (▲/▼) appear when there's more content off-screen.
+7. Press ESC or click **Close** → returns to the previous screen.
+8. Open Controls settings → search "Daily Ride Plan" → category "ImagineMoreFun" → rebind J to something else.
 
 ### Stage 6 — Passport persistence
 - [ ] `passport.json` accumulates per-ride stamp counts + day history
