@@ -32,11 +32,16 @@ public final class DailyPlanManager {
         }
       }
     }
+    boolean regenerated = false;
     if (cached == null
         || !today.toString().equals(cached.date)
         || cached.layers == null
         || cached.layers.isEmpty()) {
       cached = DailyPlanGenerator.generate(today);
+      regenerated = true;
+    }
+    boolean extended = DailyPlanGenerator.ensureTailCapacity(cached);
+    if (regenerated || extended) {
       DailyPlanStorage.save(cached);
     }
     return cached;

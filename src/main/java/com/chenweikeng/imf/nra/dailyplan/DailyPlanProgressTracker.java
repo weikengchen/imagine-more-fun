@@ -2,8 +2,6 @@ package com.chenweikeng.imf.nra.dailyplan;
 
 import com.chenweikeng.imf.nra.ride.RideCountManager;
 import com.chenweikeng.imf.nra.ride.RideName;
-import java.util.List;
-import java.util.Random;
 import net.minecraft.client.Minecraft;
 
 public final class DailyPlanProgressTracker {
@@ -61,26 +59,9 @@ public final class DailyPlanProgressTracker {
       }
     }
 
-    if (anyChanged) {
-      ensureTailCapacity(plan);
+    boolean extended = DailyPlanGenerator.ensureTailCapacity(plan);
+    if (anyChanged || extended) {
       DailyPlanStorage.save(plan);
     }
-  }
-
-  /** If the plan has fewer than {@code MIN_UNFINISHED_TAIL} open layers, top it up. */
-  private static void ensureTailCapacity(DailyPlan plan) {
-    int unfinished = 0;
-    for (DailyPlanLayer layer : plan.layers) {
-      if (!layer.completed) {
-        unfinished++;
-      }
-    }
-    int needed = DailyPlanGenerator.MIN_UNFINISHED_TAIL - unfinished;
-    if (needed <= 0) {
-      return;
-    }
-    List<RideName> eligible = DailyPlanGenerator.buildEligibleRides();
-    Random random = new Random();
-    DailyPlanGenerator.appendLayers(plan, eligible, random, needed);
   }
 }

@@ -72,6 +72,32 @@ public final class DailyPlanGenerator {
   }
 
   /**
+   * Ensures there are at least {@link #MIN_UNFINISHED_TAIL} unfinished layers at the tail of the
+   * plan. Returns true if the plan was extended (caller should persist). Cheap no-op when the
+   * invariant already holds.
+   */
+  public static boolean ensureTailCapacity(DailyPlan plan) {
+    if (plan == null || plan.layers == null) {
+      return false;
+    }
+    int unfinished = 0;
+    for (DailyPlanLayer layer : plan.layers) {
+      if (!layer.completed) {
+        unfinished++;
+      }
+    }
+    int needed = MIN_UNFINISHED_TAIL - unfinished;
+    if (needed <= 0) {
+      return false;
+    }
+    List<RideName> eligible = buildEligibleRides();
+    Random random = new Random();
+    int before = plan.layers.size();
+    appendLayers(plan, eligible, random, needed);
+    return plan.layers.size() > before;
+  }
+
+  /**
    * Appends up to {@code count} new layers. Skips any the generator cannot construct (e.g. out of
    * eligible rides).
    */
