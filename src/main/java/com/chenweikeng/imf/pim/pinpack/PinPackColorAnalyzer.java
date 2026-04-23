@@ -1,6 +1,7 @@
 package com.chenweikeng.imf.pim.pinpack;
 
 import com.chenweikeng.imf.pim.pin.Utils;
+import com.chenweikeng.imf.pim.screen.PinBookHandler;
 import com.chenweikeng.imf.pim.screen.PinDetailHandler;
 import com.chenweikeng.imf.pim.screen.PinRarityHandler;
 import com.google.gson.JsonObject;
@@ -253,33 +254,32 @@ public final class PinPackColorAnalyzer {
   /**
    * Checks if a pin series is complete (all pins collected as MINT).
    *
+   * <p>Primary source of truth: {@link PinBookHandler}'s per-series "X/Y mints collected" counts,
+   * scraped from the "Your Pin Book" overview screen. This is authoritative because the server
+   * tells us exactly how many mints are in the series — we don't need to have opened every series's
+   * wishbook page. Fallback: the older {@link PinDetailHandler} check (per-pin details from
+   * individual series pages) remains as a secondary signal for series the pin book hasn't seen yet.
+   *
    * @param seriesName The series name to check
    * @return true if all pins in the series are MINT condition
    */
   public static boolean isSeriesComplete(String seriesName) {
-    // Check if this is a REQUIRED series
-    PinRarityHandler.PinSeriesEntry seriesEntry =
-        PinRarityHandler.getInstance().getSeriesEntry(seriesName);
-    if (seriesEntry == null || seriesEntry.availability != PinRarityHandler.Availability.REQUIRED) {
-      // Optional series or unknown - not considered "complete" for shop purposes
-      return false;
+    // Primary: per-series mint count from the player's Pin Book overview.
+    PinBookHandler.PinBookEntry bookEntry = PinBookHandler.getInstance().getBookEntry(seriesName);
+    if (bookEntry != null && bookEntry.totalMints > 0) {
+      return bookEntry.mintsCollected == bookEntry.totalMints;
     }
 
-    // Get the detail map for this series
+    // Fallback: detail-map check (requires the player to have opened this series's wishbook page).
     var detailMap = PinDetailHandler.getInstance().getSeriesDetails(seriesName);
     if (detailMap == null || detailMap.isEmpty()) {
-      // No data - can't determine, assume not complete
       return false;
     }
-
-    // Check if all pins are MINT
     for (var entry : detailMap.values()) {
       if (entry.condition != PinDetailHandler.PinCondition.MINT) {
-        return false; // At least one pin is not MINT
+        return false;
       }
     }
-
-    // All pins are MINT - series is complete
     return true;
   }
 }
