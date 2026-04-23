@@ -1,6 +1,7 @@
 package com.chenweikeng.imf.nra.dailyplan;
 
 import com.chenweikeng.imf.mixin.NraBossHealthOverlayAccessor;
+import com.chenweikeng.imf.nra.GameState;
 import com.chenweikeng.imf.nra.ServerState;
 import com.chenweikeng.imf.nra.config.ModConfig;
 import com.chenweikeng.imf.nra.config.TrackerDisplayMode;
@@ -8,6 +9,7 @@ import com.chenweikeng.imf.nra.ride.AutograbHolder;
 import com.chenweikeng.imf.nra.ride.CurrentRideHolder;
 import com.chenweikeng.imf.nra.ride.RideCountManager;
 import com.chenweikeng.imf.nra.ride.RideName;
+import com.chenweikeng.imf.nra.util.TimeFormatUtil;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
@@ -125,6 +127,10 @@ public final class DailyPlanHudRenderer {
     int titleColor = allDone ? COLOR_DONE : COLOR_TITLE;
     int titleWidth = font.width(title);
 
+    RidingStatus riding = buildRidingStatus(client);
+    int ridingWidth = riding == null ? 0 : font.width(riding.text);
+    int ridingExtraHeight = riding == null ? 0 : FONT_HEIGHT + 2;
+
     List<NodeLayout> layouts = buildLayouts(font, plan);
 
     int chainWidth = 0;
@@ -135,9 +141,10 @@ public final class DailyPlanHudRenderer {
       }
     }
 
-    int panelInnerWidth = Math.max(chainWidth, titleWidth);
+    int panelInnerWidth = Math.max(Math.max(chainWidth, titleWidth), ridingWidth);
     int panelWidth = panelInnerWidth + PANEL_H_PAD * 2;
-    int panelHeight = PANEL_TOP_PAD + FONT_HEIGHT + 3 + NODE_HEIGHT + PANEL_BOTTOM_PAD;
+    int panelHeight =
+        PANEL_TOP_PAD + FONT_HEIGHT + 3 + ridingExtraHeight + NODE_HEIGHT + PANEL_BOTTOM_PAD;
     int panelX = (screenWidth - panelWidth) / 2;
     int panelY = 0;
 
@@ -147,8 +154,13 @@ public final class DailyPlanHudRenderer {
     int titleY = panelY + PANEL_TOP_PAD;
     context.drawString(font, title, titleX, titleY, titleColor, false);
 
-    int chainStartX = (screenWidth - chainWidth) / 2;
     int boxTopY = titleY + FONT_HEIGHT + 3;
+    if (riding != null) {
+      int ridingX = (screenWidth - ridingWidth) / 2;
+      context.drawString(font, riding.text, ridingX, boxTopY, riding.color, false);
+      boxTopY += FONT_HEIGHT + 2;
+    }
+    int chainStartX = (screenWidth - chainWidth) / 2;
     int boxCenterY = boxTopY + NODE_HEIGHT / 2;
 
     int x = chainStartX;
@@ -163,6 +175,33 @@ public final class DailyPlanHudRenderer {
         x += CONNECTOR_WIDTH;
       }
     }
+  }
+
+  private static RidingStatus buildRidingStatus(Minecraft client) {
+    RideName currentRide = CurrentRideHolder.getCurrentRide();
+    RideName autograbRide = AutograbHolder.getRideAtLocation(client);
+
+    if (currentRide != null) {
+      Integer progress = CurrentRideHolder.getCurrentProgressPercent();
+      Integer elapsed = CurrentRideHolder.getElapsedSeconds();
+      StringBuilder sb = new StringBuilder("\u25B6 ").append(currentRide.getDisplayName());
+      if (progress != null && elapsed != null) {
+        int remaining = Math.max(0, currentRide.getRideTime() - elapsed);
+        sb.append(" \u00B7 ")
+            .append(progress)
+            .append("% \u00B7 ")
+            .append(TimeFormatUtil.formatDuration(remaining))
+            .append(" left");
+      }
+      return new RidingStatus(sb.toString(), ModConfig.currentSetting.trackerRidingColor);
+    }
+
+    if (autograbRide != null && !GameState.getInstance().isValidPassenger(client.player)) {
+      String text = "\u27F2 Autograbbing " + autograbRide.getDisplayName() + "\u2026";
+      return new RidingStatus(text, ModConfig.currentSetting.trackerAutograbbingColor);
+    }
+
+    return null;
   }
 
   private static List<NodeLayout> buildLayouts(Font font, DailyPlan plan) {
@@ -257,6 +296,16 @@ public final class DailyPlanHudRenderer {
           + d.getDayOfMonth();
     } catch (Exception e) {
       return dateStr;
+    }
+  }
+
+  private static final class RidingStatus {
+    final String text;
+    final int color;
+
+    RidingStatus(String text, int color) {
+      this.text = text;
+      this.color = color;
     }
   }
 

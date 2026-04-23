@@ -69,6 +69,11 @@ Design reference: `/Users/cusgadmin/Downloads/compass_artifact_wf-ccdf816b-1bc7-
 - [x] Proper horizontal connector lines (2px thick, drawn via `hLine`) between node boxes
 - [x] Connector line colored green when the source node is complete — "energized skill-tree" feel
 
+### Stage 3.6 — Riding countdown row ✅ shipped
+- [x] When riding (`CurrentRideHolder.getCurrentRide() != null`), render a row between title and chain: `▶ <ride> · <pct>% · <m s> left` in `trackerRidingColor`
+- [x] When autograbbing (autograb ride at location & not yet a passenger), render `⟲ Autograbbing <ride>…` in `trackerAutograbbingColor`
+- [x] Panel height grows automatically when the row is present, shrinks back when not
+
 **How to test Stage 3**
 1. Join ImagineFun with new JAR.
 2. Expect top-of-screen row: `✨ Ride Plan · Thu Apr 23 · 0/5` (gold), below it a centered chain `○ ALICE 0/2 ── ○ BTM 0/2 ──` … with untouched nodes in gray.
