@@ -195,10 +195,9 @@ public final class DailyPlanHudRenderer {
     if (hasLeftEllipsis) {
       context.drawString(font, ELLIPSIS, x, connectorY - FONT_HEIGHT / 2, COLOR_DIM, false);
       x += ellipsisWidth;
-      // Powered when the active layer is the first visible layer (prior is off-screen, done).
-      boolean poweredLeft = activeIdx > 0 && activeIdx == window.start;
-      int leftColor = poweredLeft ? COLOR_DONE : COLOR_CONNECTOR;
-      drawConnector(context, x, connectorY, x + CONNECTOR_WIDTH, leftColor, poweredLeft);
+      // Anything off-screen to the left is done (gating invariant), so the left-ellipsis
+      // connector is always a done → whatever edge — always animate.
+      drawConnector(context, x, connectorY, x + CONNECTOR_WIDTH, COLOR_DONE, true);
       x += CONNECTOR_WIDTH;
     }
 
@@ -208,8 +207,7 @@ public final class DailyPlanHudRenderer {
       x += column.width;
 
       if (i < columns.size() - 1) {
-        int absoluteSourceIdx = window.start + i;
-        boolean powered = absoluteSourceIdx == activeIdx - 1;
+        boolean powered = column.isDone;
         int connColor = column.isDone ? COLOR_DONE : COLOR_CONNECTOR;
         drawConnector(context, x, connectorY, x + CONNECTOR_WIDTH, connColor, powered);
         x += CONNECTOR_WIDTH;
