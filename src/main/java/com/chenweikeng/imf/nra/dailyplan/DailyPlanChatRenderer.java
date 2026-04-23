@@ -29,12 +29,13 @@ public final class DailyPlanChatRenderer {
       return;
     }
 
-    int doneLayers = 0;
     int totalLayers = plan.layers == null ? 0 : plan.layers.size();
+    int activeLevel = totalLayers + 1;
     if (plan.layers != null) {
-      for (DailyPlanLayer layer : plan.layers) {
-        if (layer.completed) {
-          doneLayers++;
+      for (int i = 0; i < plan.layers.size(); i++) {
+        if (!plan.layers.get(i).completed) {
+          activeLevel = i + 1;
+          break;
         }
       }
     }
@@ -53,9 +54,9 @@ public final class DailyPlanChatRenderer {
           header
               .copy()
               .append(
-                  Component.literal("  " + doneLayers + "/" + totalLayers + " layers")
+                  Component.literal("  Level " + activeLevel)
                       .withStyle(ChatFormatting.BOLD)
-                      .withColor(doneLayers == totalLayers ? DONE_COLOR : PROGRESS_COLOR));
+                      .withColor(PROGRESS_COLOR));
     }
     sendLine(client, header);
 

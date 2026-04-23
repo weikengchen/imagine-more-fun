@@ -114,21 +114,10 @@ public final class DailyPlanHudRenderer {
   private static void renderPlan(GuiGraphics context, Font font, Minecraft client, DailyPlan plan) {
     int screenWidth = client.getWindow().getGuiScaledWidth();
 
-    int doneLayers = 0;
-    for (DailyPlanLayer layer : plan.layers) {
-      if (layer.completed) {
-        doneLayers++;
-      }
-    }
-    int totalLayers = plan.layers.size();
+    int activeLevel = activeLevel(plan);
 
     String title =
-        "\u2728 Ride Plan \u00B7 "
-            + formatDateFriendly(plan.date)
-            + " \u00B7 "
-            + doneLayers
-            + "/"
-            + totalLayers;
+        "\u2728 Ride Plan \u00B7 " + formatDateFriendly(plan.date) + " \u00B7 Level " + activeLevel;
     int titleColor = COLOR_TITLE;
     int titleWidth = font.width(title);
 
@@ -222,6 +211,16 @@ public final class DailyPlanHudRenderer {
       x += CONNECTOR_WIDTH;
       context.drawString(font, ELLIPSIS, x, connectorY - FONT_HEIGHT / 2, COLOR_DIM, false);
     }
+  }
+
+  /** 1-indexed level of the first incomplete layer (or size+1 if fully complete — unusual). */
+  private static int activeLevel(DailyPlan plan) {
+    for (int i = 0; i < plan.layers.size(); i++) {
+      if (!plan.layers.get(i).completed) {
+        return i + 1;
+      }
+    }
+    return plan.layers.size() + 1;
   }
 
   private static WindowRange computeWindow(DailyPlan plan) {

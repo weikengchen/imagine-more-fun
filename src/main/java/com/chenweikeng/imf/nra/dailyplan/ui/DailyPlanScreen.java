@@ -153,20 +153,18 @@ public class DailyPlanScreen extends Screen {
   private void renderHeader(GuiGraphics graphics, DailyPlan plan, int left, int top, int right) {
     int centerX = (left + right) / 2;
 
-    int doneLayers = 0;
-    for (DailyPlanLayer layer : plan.layers) {
-      if (layer.completed) {
-        doneLayers++;
+    int activeLevel = plan.layers.size() + 1;
+    for (int i = 0; i < plan.layers.size(); i++) {
+      if (!plan.layers.get(i).completed) {
+        activeLevel = i + 1;
+        break;
       }
     }
     String titleLine =
         "\u2728 Ride Plan  \u00B7  "
             + formatDateFriendly(plan.date)
-            + "  \u00B7  "
-            + doneLayers
-            + "/"
-            + plan.layers.size()
-            + " layers";
+            + "  \u00B7  Level "
+            + activeLevel;
     graphics.drawCenteredString(
         this.font, Component.literal(titleLine), centerX, top + 4, COLOR_TITLE);
 
