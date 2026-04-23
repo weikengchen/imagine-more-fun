@@ -39,6 +39,10 @@ public final class DailyPlanHudRenderer {
   private static final int PANEL_BG = 0xB0000000;
   private static final int NODE_BG = 0x60000000;
 
+  private static final int POWER_SPARK_COLOR = 0xFFCCFFFF;
+  private static final int POWER_SPARK_WIDTH = 5;
+  private static final long POWER_PERIOD_MS = 1500L;
+
   private static final String GLYPH_DONE = "\u25CF";
   private static final String GLYPH_PROGRESS = "\u25D0";
   private static final String GLYPH_IDLE = "\u25CB";
@@ -190,7 +194,10 @@ public final class DailyPlanHudRenderer {
     if (hasLeftEllipsis) {
       context.drawString(font, ELLIPSIS, x, connectorY - FONT_HEIGHT / 2, COLOR_DIM, false);
       x += ellipsisWidth;
-      drawConnector(context, x, connectorY, x + CONNECTOR_WIDTH, COLOR_CONNECTOR);
+      // Powered when the active layer is the first visible layer (prior is off-screen, done).
+      boolean poweredLeft = activeIdx > 0 && activeIdx == window.start;
+      int leftColor = poweredLeft ? COLOR_DONE : COLOR_CONNECTOR;
+      drawConnector(context, x, connectorY, x + CONNECTOR_WIDTH, leftColor, poweredLeft);
       x += CONNECTOR_WIDTH;
     }
 
@@ -200,8 +207,10 @@ public final class DailyPlanHudRenderer {
       x += column.width;
 
       if (i < columns.size() - 1) {
+        int absoluteSourceIdx = window.start + i;
+        boolean powered = absoluteSourceIdx == activeIdx - 1;
         int connColor = column.isDone ? COLOR_DONE : COLOR_CONNECTOR;
-        drawConnector(context, x, connectorY, x + CONNECTOR_WIDTH, connColor);
+        drawConnector(context, x, connectorY, x + CONNECTOR_WIDTH, connColor, powered);
         x += CONNECTOR_WIDTH;
       }
     }
@@ -211,7 +220,7 @@ public final class DailyPlanHudRenderer {
           !columns.isEmpty() && columns.get(columns.size() - 1).isDone
               ? COLOR_DONE
               : COLOR_CONNECTOR;
-      drawConnector(context, x, connectorY, x + CONNECTOR_WIDTH, lastConnColor);
+      drawConnector(context, x, connectorY, x + CONNECTOR_WIDTH, lastConnColor, false);
       x += CONNECTOR_WIDTH;
       context.drawString(font, ELLIPSIS, x, connectorY - FONT_HEIGHT / 2, COLOR_DIM, false);
     }
@@ -369,9 +378,26 @@ public final class DailyPlanHudRenderer {
   }
 
   private static void drawConnector(
-      GuiGraphics context, int left, int centerY, int right, int color) {
+      GuiGraphics context, int left, int centerY, int right, int color, boolean powered) {
+    // Base trail
     context.hLine(left, right - 1, centerY - 1, color);
     context.hLine(left, right - 1, centerY, color);
+
+    if (!powered || right <= left) {
+      return;
+    }
+    // Bright moving spark — "power flowing into the active layer".
+    long now = System.currentTimeMillis();
+    double phase = (now % POWER_PERIOD_MS) / (double) POWER_PERIOD_MS; // 0..1
+    int width = right - left;
+    int sparkCenter = left + (int) (phase * width);
+    int sparkHalf = POWER_SPARK_WIDTH / 2;
+    int sparkLeft = Math.max(left, sparkCenter - sparkHalf);
+    int sparkRight = Math.min(right, sparkCenter + sparkHalf + 1);
+    if (sparkLeft < sparkRight) {
+      context.hLine(sparkLeft, sparkRight - 1, centerY - 1, POWER_SPARK_COLOR);
+      context.hLine(sparkLeft, sparkRight - 1, centerY, POWER_SPARK_COLOR);
+    }
   }
 
   /**

@@ -3,13 +3,16 @@ package com.chenweikeng.imf.nra.dailyplan;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanLayer.LayerType;
 import com.chenweikeng.imf.nra.ride.RideName;
 import java.util.Random;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 
+/**
+ * Sound + particle flourish for node and layer completions. Chat messages are intentionally not
+ * sent — the HUD's colour/state change already signals the completion, so extra chat lines are
+ * noise.
+ */
 public final class DailyPlanCelebration {
   private static final Random RANDOM = new Random();
   private static final int NODE_PARTICLES = 10;
@@ -21,26 +24,9 @@ public final class DailyPlanCelebration {
     if (client == null || client.player == null || client.level == null) {
       return;
     }
-
-    Component msg =
-        Component.empty()
-            .append(Component.literal("\u2728 ").withStyle(ChatFormatting.GOLD))
-            .append(Component.literal("[IMF] ").withStyle(ChatFormatting.YELLOW))
-            .append(Component.literal("Node complete: ").withStyle(ChatFormatting.GREEN))
-            .append(Component.literal(ride.getDisplayName()).withStyle(ChatFormatting.AQUA));
-    if (siblings > 1) {
-      msg =
-          msg.copy()
-              .append(
-                  Component.literal(" (" + (nodeIndex + 1) + "/" + siblings + ")")
-                      .withStyle(ChatFormatting.GRAY));
-    }
-    client.player.displayClientMessage(msg, false);
-
     client
         .getSoundManager()
         .play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BELL.value(), 1.5f, 1.0f));
-
     spawnParticles(client, NODE_PARTICLES);
   }
 
@@ -48,24 +34,9 @@ public final class DailyPlanCelebration {
     if (client == null || client.player == null || client.level == null) {
       return;
     }
-
-    String badge = type == null ? "" : type.badge();
-    String prefix = badge.isEmpty() ? "Layer" : ("Layer [" + badge + "]");
-
-    Component msg =
-        Component.empty()
-            .append(Component.literal("\u2728 ").withStyle(ChatFormatting.GOLD))
-            .append(Component.literal("[IMF] ").withStyle(ChatFormatting.YELLOW))
-            .append(
-                Component.literal(prefix + " " + layerNumber + " complete!")
-                    .withStyle(ChatFormatting.BOLD)
-                    .withStyle(ChatFormatting.GOLD));
-    client.player.displayClientMessage(msg, false);
-
     client
         .getSoundManager()
         .play(SimpleSoundInstance.forUI(SoundEvents.PLAYER_LEVELUP, 0.9f, 1.3f));
-
     spawnParticles(client, LAYER_PARTICLES);
   }
 

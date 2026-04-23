@@ -84,6 +84,12 @@ Design reference: `/Users/cusgadmin/Downloads/compass_artifact_wf-ccdf816b-1bc7-
 7. `trackerDisplayMode=ONLY_WHEN_RIDING` → plan HUD hides when not riding, mirroring strategy behavior.
 8. All 5 nodes done → title flips green, chain is all-green `●`s.
 
+### Stage 4.8 — Power-transmission connector + quieter chat ✅ shipped
+- [x] Only the **prior → active** connector animates: a 5-pixel white-cyan spark sweeps left → right over the 1.5-second period on top of the static green trail
+- [x] Works when the active layer is the left-edge of the sliding window (animates the left-ellipsis connector instead)
+- [x] All other connectors (done→done, active→gated, right-ellipsis) stay static
+- [x] Removed chat messages from `DailyPlanCelebration.nodeCompleted` and `layerCompleted`; sound + particles remain
+
 ### Stage 4.7 — Blink active-ride node ✅ shipped
 - [x] When the player is on (or autograbbing) a ride that matches an uncompleted node in the **active** layer, that node's border pulses blue (1 sec sine, dim → bright cyan)
 - [x] Applies to HUD and full-window Screen
