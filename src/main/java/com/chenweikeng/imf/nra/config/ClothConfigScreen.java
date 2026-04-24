@@ -1,5 +1,6 @@
 package com.chenweikeng.imf.nra.config;
 
+import com.chenweikeng.imf.nra.ServerState;
 import com.chenweikeng.imf.nra.compat.MonkeycraftCompat;
 import com.chenweikeng.imf.nra.ride.RideName;
 import com.chenweikeng.imf.nra.util.TimeFormatUtil;
@@ -549,7 +550,7 @@ public class ClothConfigScreen {
               .build());
     }
 
-    if (MonkeycraftCompat.isAvailable()) {
+    if (ServerState.isImagineFunServer() && MonkeycraftCompat.isAvailable()) {
       ConfigCategory monkeyCraft = builder.getOrCreateCategory(Component.literal("MonkeyCraft"));
 
       monkeyCraft.addEntry(

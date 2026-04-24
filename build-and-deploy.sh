@@ -100,10 +100,27 @@ remove_old_jar "pim-*.jar"
 remove_old_jar "pim2-*.jar"
 remove_old_jar "skin-cache-mod-*.jar"
 
-# Wipe any prior imaginemorefun-*.jar (including -sources jars) so a previous
-# mod_version doesn't sit alongside the new one — Fabric refuses to start with
-# duplicate mod IDs, and -sources jars don't belong in mods/ at all.
-remove_old_jar "imaginemorefun-*.jar"
+# Wipe any prior imaginemorefun-*.jar EXCEPT the current-version filename, so
+# a prior mod_version doesn't sit alongside the new one (Fabric refuses to
+# start with duplicate mod IDs) and stray -sources jars don't pollute mods/.
+# The current-version jar is intentionally left in place — the atomic
+# `mv -f ${TEMP_JAR} ${TARGET_JAR}` below replaces it via rename(2), which
+# preserves the old inode for any running JVM's open ZipFile handle. Deleting
+# it here first would leave a brief window where the target path doesn't
+# exist, breaking a freshly-launching JVM that opens the file in that window.
+remove_old_jar_except_current() {
+    local pattern="$1"
+    local keep="$2"
+    local found_count
+    found_count=$(find "${TARGET_DIR}" -maxdepth 1 -type f -name "${pattern}" -not -name "${keep}" 2>/dev/null | wc -l | tr -d '[:space:]')
+    if [ "${found_count}" != "0" ]; then
+        echo "Removing superseded jar(s) matching ${pattern} (keeping ${keep}):"
+        find "${TARGET_DIR}" -maxdepth 1 -type f -name "${pattern}" -not -name "${keep}" -print 2>/dev/null | sed 's|^|  - |'
+        find "${TARGET_DIR}" -maxdepth 1 -type f -name "${pattern}" -not -name "${keep}" -delete 2>/dev/null
+    fi
+}
+
+remove_old_jar_except_current "imaginemorefun-*.jar" "${JAR_NAME}"
 
 verify_jar() {
     local jar_file="$1"

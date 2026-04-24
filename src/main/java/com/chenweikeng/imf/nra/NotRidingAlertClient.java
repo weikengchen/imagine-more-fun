@@ -88,7 +88,6 @@ public class NotRidingAlertClient implements ClientModInitializer {
     HistoryManager.load();
     DailyRideSnapshot.getInstance();
     LOGGER.info("Not Riding Alert client initialized");
-    MonkeycraftCompat.init();
     AutograbRegionRenderer.register();
     DailyPlanKeybind.register();
 
@@ -96,6 +95,7 @@ public class NotRidingAlertClient implements ClientModInitializer {
         (handler, sender, client) -> {
           ServerState.onJoin(client);
           if (ServerState.isImagineFunServer()) {
+            MonkeycraftCompat.init();
             SessionTracker.getInstance().onSessionStart();
           }
           if (ServerState.isImagineFunServer()
@@ -381,7 +381,8 @@ public class NotRidingAlertClient implements ClientModInitializer {
                   Minecraft client = Minecraft.getInstance();
                   client.execute(
                       () -> {
-                        if (MonkeycraftCompat.isClientConnected()) {
+                        if (ServerState.isImagineFunServer()
+                            && MonkeycraftCompat.isClientConnected()) {
                           DailyReport report = DailyReportGenerator.generateLive();
                           if (report != null) {
                             RideReportChatRenderer.send(client, report);
@@ -404,7 +405,8 @@ public class NotRidingAlertClient implements ClientModInitializer {
                           Minecraft client = Minecraft.getInstance();
                           client.execute(
                               () -> {
-                                if (MonkeycraftCompat.isClientConnected()) {
+                                if (ServerState.isImagineFunServer()
+                                    && MonkeycraftCompat.isClientConnected()) {
                                   DailyReport report = DailyReportGenerator.generate(date);
                                   if (report != null) {
                                     RideReportChatRenderer.send(client, report);

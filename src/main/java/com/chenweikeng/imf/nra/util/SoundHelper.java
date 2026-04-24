@@ -1,6 +1,7 @@
 package com.chenweikeng.imf.nra.util;
 
 import com.chenweikeng.imf.nra.GameState;
+import com.chenweikeng.imf.nra.ServerState;
 import com.chenweikeng.imf.nra.compat.MonkeycraftCompat;
 import com.chenweikeng.imf.nra.config.ModConfig;
 import net.minecraft.client.Minecraft;
@@ -17,7 +18,7 @@ public class SoundHelper {
       return;
     }
 
-    if (GameState.getInstance().isMonkeyAttached()) {
+    if (ServerState.isImagineFunServer() && GameState.getInstance().isMonkeyAttached()) {
       MonkeycraftCompat.sendImmediateNotification(NOTIFICATION_TITLE, NOTIFICATION_BODY, true);
       return;
     }

@@ -5,15 +5,21 @@ import net.fabricmc.loader.api.FabricLoader;
 public final class MonkeycraftCompat {
   private MonkeycraftCompat() {}
 
+  private static boolean initialized = false;
+
   public static boolean isAvailable() {
     return FabricLoader.getInstance().isModLoaded("monkeycraft");
   }
 
   public static void init() {
+    if (initialized) {
+      return;
+    }
     if (!isAvailable()) {
       return;
     }
     MonkeycraftCompatImpl.init();
+    initialized = true;
   }
 
   public static boolean isClientConnected() {
