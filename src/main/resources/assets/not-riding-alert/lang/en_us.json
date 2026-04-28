@@ -119,9 +119,10 @@
   "config.not-riding-alert.rideReportNotifyMode.never": "Never",
   "config.not-riding-alert.randomRideOverride": "Override /randomride with goal-aware warp",
   "config.not-riding-alert.randomRideOverride.tooltip": "When enabled, /randomride picks a random ride you still have an ongoing goal on and warps you there via /w. Falls back to the server's /randomride if you have no remaining goals.",
-  "config.not-riding-alert.showDailyPlanHud": "Show Daily Ride Plan HUD",
-  "config.not-riding-alert.showDailyPlanHud.tooltip": "Draw today's ride plan as a horizontal tree at the top of the screen. When on, the strategy HUD is hidden to make room.",
+  "config.not-riding-alert.rideHubMode": "Ride hub",
+  "config.not-riding-alert.rideHubMode.tooltip": "Choose which ride HUD to show. Ride Plan draws today's plan as a horizontal tree at the top of the screen; Strategy Hub shows per-ride goal progress. Switching hides the config options that don't apply.",
+  "config.not-riding-alert.rideHubMode.ride_plan": "Ride Plan",
+  "config.not-riding-alert.rideHubMode.strategy_hub": "Strategy Hub",
   "options.nra.openaudiomc_volume": "OpenAudioMc Volume",
-  "key.category.imaginemorefun.main": "ImagineMoreFun",
-  "key.imaginemorefun.open_rideplan": "Open Daily Ride Plan"
+  "key.category.imaginemorefun.main": "ImagineMoreFun"
 }

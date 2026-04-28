@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import me.shedaniel.clothconfig2.api.Requirement;
 import me.shedaniel.clothconfig2.impl.builders.DropdownMenuBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -148,16 +149,6 @@ public class ClothConfigScreen {
             .setTooltip(
                 Component.translatable("config.not-riding-alert.randomRideOverride.tooltip"))
             .setSaveConsumer(newValue -> profile.randomRideOverride = newValue)
-            .build());
-
-    general.addEntry(
-        entryBuilder
-            .startBooleanToggle(
-                Component.translatable("config.not-riding-alert.showDailyPlanHud"),
-                profile.showDailyPlanHud)
-            .setDefaultValue(ConfigDefaults.SHOW_DAILY_PLAN_HUD)
-            .setTooltip(Component.translatable("config.not-riding-alert.showDailyPlanHud.tooltip"))
-            .setSaveConsumer(newValue -> profile.showDailyPlanHud = newValue)
             .build());
 
     ConfigCategory visual =
@@ -314,6 +305,24 @@ public class ClothConfigScreen {
         builder.getOrCreateCategory(
             Component.translatable("config.not-riding-alert.category.rides"));
 
+    var rideHubEntry =
+        entryBuilder
+            .startEnumSelector(
+                Component.translatable("config.not-riding-alert.rideHubMode"),
+                RideHubMode.class,
+                profile.rideHubMode)
+            .setDefaultValue(ConfigDefaults.RIDE_HUB_MODE)
+            .setTooltip(Component.translatable("config.not-riding-alert.rideHubMode.tooltip"))
+            .setSaveConsumer(newValue -> profile.rideHubMode = newValue)
+            .setEnumNameProvider(
+                mode ->
+                    Component.translatable(
+                        "config.not-riding-alert.rideHubMode." + mode.name().toLowerCase()))
+            .build();
+    tracker.addEntry(rideHubEntry);
+
+    Requirement strategyHubOnly = Requirement.isValue(rideHubEntry, RideHubMode.STRATEGY_HUB);
+
     tracker.addEntry(
         entryBuilder
             .startEnumSelector(
@@ -346,6 +355,7 @@ public class ClothConfigScreen {
                     Component.translatable(
                         "config.not-riding-alert.strategyHudRendererVersion."
                             + version.name().toLowerCase()))
+            .setDisplayRequirement(strategyHubOnly)
             .build());
 
     tracker.addEntry(
@@ -358,6 +368,7 @@ public class ClothConfigScreen {
             .setDefaultValue(ConfigDefaults.RIDE_DISPLAY_COUNT)
             .setTooltip(Component.translatable("config.not-riding-alert.rideDisplayCount.tooltip"))
             .setSaveConsumer(newValue -> profile.rideDisplayCount = newValue)
+            .setDisplayRequirement(strategyHubOnly)
             .build());
 
     tracker.addEntry(
@@ -373,6 +384,7 @@ public class ClothConfigScreen {
                 rule ->
                     Component.translatable(
                         "config.not-riding-alert.sortingRules." + rule.name().toLowerCase()))
+            .setDisplayRequirement(strategyHubOnly)
             .build());
 
     tracker.addEntry(
@@ -393,6 +405,7 @@ public class ClothConfigScreen {
                     profile.minRideTimeMinutes = newValue;
                   }
                 })
+            .setDisplayRequirement(strategyHubOnly)
             .build());
 
     tracker.addEntry(
@@ -442,6 +455,7 @@ public class ClothConfigScreen {
             .setTooltip(
                 Component.translatable("config.not-riding-alert.trackerNormalColor.tooltip"))
             .setSaveConsumer2(color -> profile.trackerNormalColor = color.getColor() | 0xFF000000)
+            .setDisplayRequirement(strategyHubOnly)
             .build());
 
     tracker.addEntry(
@@ -476,6 +490,7 @@ public class ClothConfigScreen {
             .setDefaultValue(TextColor.fromRgb(ConfigDefaults.TRACKER_ERROR_COLOR & 0x00FFFFFF))
             .setTooltip(Component.translatable("config.not-riding-alert.trackerErrorColor.tooltip"))
             .setSaveConsumer(color -> profile.trackerErrorColor = color | 0xFF000000)
+            .setDisplayRequirement(strategyHubOnly)
             .build());
 
     tracker.addEntry(
@@ -491,6 +506,7 @@ public class ClothConfigScreen {
                 mode ->
                     Component.translatable(
                         "config.not-riding-alert.closestRideMode." + mode.name().toLowerCase()))
+            .setDisplayRequirement(strategyHubOnly)
             .build());
 
     tracker.addEntry(
@@ -504,6 +520,7 @@ public class ClothConfigScreen {
                 Component.translatable("config.not-riding-alert.trackerClosestRideColor.tooltip"))
             .setSaveConsumer2(
                 color -> profile.trackerClosestRideColor = color.getColor() | 0xFF000000)
+            .setDisplayRequirement(strategyHubOnly)
             .build());
 
     ConfigCategory advanceNotice =

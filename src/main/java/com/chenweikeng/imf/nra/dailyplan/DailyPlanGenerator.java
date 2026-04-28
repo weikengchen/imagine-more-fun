@@ -152,7 +152,7 @@ public final class DailyPlanGenerator {
       candidates = new ArrayList<>(eligible);
     }
 
-    LayerType type = pickLayerType(existing.size(), random);
+    LayerType type = pickLayerType(existing, random);
     int wantNodes = nodeCountFor(type, random);
 
     if (candidates.size() < wantNodes) {
@@ -171,7 +171,7 @@ public final class DailyPlanGenerator {
         Collections.shuffle(singleCandidates, random);
         RideName pick = singleCandidates.get(0);
         List<DailyPlanNode> nodes = new ArrayList<>(1);
-        nodes.add(new DailyPlanNode(pick.toMatchString(), chooseK(pick.getRideTime(), random)));
+        nodes.add(new DailyPlanNode(pick.toMatchString(), chooseK(pick, random)));
         return new DailyPlanLayer(LayerType.SINGLE, nodes);
       }
       // All candidates are companion-required — bump to an OR pair.
@@ -186,7 +186,7 @@ public final class DailyPlanGenerator {
     List<DailyPlanNode> nodes = new ArrayList<>(wantNodes);
     for (int i = 0; i < wantNodes; i++) {
       RideName pick = candidates.get(i);
-      nodes.add(new DailyPlanNode(pick.toMatchString(), chooseK(pick.getRideTime(), random)));
+      nodes.add(new DailyPlanNode(pick.toMatchString(), chooseK(pick, random)));
     }
 
     return new DailyPlanLayer(type, nodes);
@@ -194,9 +194,13 @@ public final class DailyPlanGenerator {
 
   /**
    * k by ride duration: &gt;10 min → 1, 5–10 min → 2 or 3, &lt;5 min → 2 through 5. Matches the
-   * "don't ask for 5 laps of Pirates" intuition.
+   * "don't ask for 5 laps of Pirates" intuition. Lincoln is capped at 1 — it's a slog to grind.
    */
-  private static int chooseK(int rideTimeSeconds, Random random) {
+  private static int chooseK(RideName ride, Random random) {
+    if (ride == RideName.GREAT_MOMENTS_WITH_MR_LINCOLN) {
+      return 1;
+    }
+    int rideTimeSeconds = ride.getRideTime();
     if (rideTimeSeconds > 600) {
       return 1;
     }
@@ -217,8 +221,16 @@ public final class DailyPlanGenerator {
     return out;
   }
 
-  private static LayerType pickLayerType(int layerIndex, Random random) {
+  private static LayerType pickLayerType(List<DailyPlanLayer> existing, Random random) {
+    int layerIndex = existing.size();
     if (layerIndex == 0) {
+      return LayerType.SINGLE;
+    }
+
+    // Never chain two non-SINGLE layers back-to-back. This also keeps the companion-required
+    // rides (Tiki, Red Car Trolley) from reappearing, since SINGLE layers exclude them.
+    LayerType previous = existing.get(layerIndex - 1).type;
+    if (previous == LayerType.AND || previous == LayerType.OR) {
       return LayerType.SINGLE;
     }
 

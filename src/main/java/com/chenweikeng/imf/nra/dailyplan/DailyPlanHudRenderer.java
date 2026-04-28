@@ -4,6 +4,7 @@ import com.chenweikeng.imf.mixin.NraBossHealthOverlayAccessor;
 import com.chenweikeng.imf.nra.GameState;
 import com.chenweikeng.imf.nra.ServerState;
 import com.chenweikeng.imf.nra.config.ModConfig;
+import com.chenweikeng.imf.nra.config.RideHubMode;
 import com.chenweikeng.imf.nra.config.TrackerDisplayMode;
 import com.chenweikeng.imf.nra.dailyplan.DailyPlanLayer.LayerType;
 import com.chenweikeng.imf.nra.ride.AutograbHolder;
@@ -64,7 +65,7 @@ public final class DailyPlanHudRenderer {
   private DailyPlanHudRenderer() {}
 
   public static boolean isActive() {
-    if (!ModConfig.currentSetting.showDailyPlanHud) {
+    if (ModConfig.currentSetting.rideHubMode != RideHubMode.RIDE_PLAN) {
       return false;
     }
     if (!ServerState.isImagineFunServer()) {
@@ -75,7 +76,7 @@ public final class DailyPlanHudRenderer {
   }
 
   public static void render(GuiGraphics context, DeltaTracker tickCounter) {
-    if (!ModConfig.currentSetting.showDailyPlanHud) {
+    if (ModConfig.currentSetting.rideHubMode != RideHubMode.RIDE_PLAN) {
       return;
     }
     if (!ServerState.isImagineFunServer()) {

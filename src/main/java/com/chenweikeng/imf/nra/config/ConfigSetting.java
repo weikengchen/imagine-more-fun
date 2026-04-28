@@ -55,7 +55,7 @@ public class ConfigSetting {
   public boolean enableOpenAudioMc = ConfigDefaults.ENABLE_OPEN_AUDIO_MC;
   public RideReportNotifyMode rideReportNotifyMode = ConfigDefaults.RIDE_REPORT_NOTIFY_MODE;
   public boolean randomRideOverride = ConfigDefaults.RANDOM_RIDE_OVERRIDE;
-  public boolean showDailyPlanHud = ConfigDefaults.SHOW_DAILY_PLAN_HUD;
+  public RideHubMode rideHubMode = ConfigDefaults.RIDE_HUB_MODE;
 
   public int getAdvanceNoticeSeconds(RideName ride) {
     return advanceNoticeSeconds.getOrDefault(ride.toMatchString(), 0);
@@ -107,7 +107,7 @@ public class ConfigSetting {
     enableOpenAudioMc = ConfigDefaults.ENABLE_OPEN_AUDIO_MC;
     rideReportNotifyMode = ConfigDefaults.RIDE_REPORT_NOTIFY_MODE;
     randomRideOverride = ConfigDefaults.RANDOM_RIDE_OVERRIDE;
-    showDailyPlanHud = ConfigDefaults.SHOW_DAILY_PLAN_HUD;
+    rideHubMode = ConfigDefaults.RIDE_HUB_MODE;
   }
 
   public ConfigSetting copy() {
@@ -155,7 +155,7 @@ public class ConfigSetting {
     copy.enableOpenAudioMc = this.enableOpenAudioMc;
     copy.rideReportNotifyMode = this.rideReportNotifyMode;
     copy.randomRideOverride = this.randomRideOverride;
-    copy.showDailyPlanHud = this.showDailyPlanHud;
+    copy.rideHubMode = this.rideHubMode;
     return copy;
   }
 
@@ -200,7 +200,7 @@ public class ConfigSetting {
         && enableOpenAudioMc == that.enableOpenAudioMc
         && rideReportNotifyMode == that.rideReportNotifyMode
         && randomRideOverride == that.randomRideOverride
-        && showDailyPlanHud == that.showDailyPlanHud
+        && rideHubMode == that.rideHubMode
         && Objects.equals(soundId, that.soundId)
         && Objects.equals(minRideTimeMinutes, that.minRideTimeMinutes)
         && Objects.equals(hiddenRides, that.hiddenRides)
@@ -250,6 +250,6 @@ public class ConfigSetting {
         enableOpenAudioMc,
         rideReportNotifyMode,
         randomRideOverride,
-        showDailyPlanHud);
+        rideHubMode);
   }
 }

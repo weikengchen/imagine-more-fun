@@ -20,12 +20,6 @@ public final class WindowMinimizeHandler {
   private static final int SHRINK_THRESHOLD_PX = 500;
 
   private int monitorTicksLeft = 0;
-  private int lastW = -1;
-  private int lastH = -1;
-  private int lastX = Integer.MIN_VALUE;
-  private int lastY = Integer.MIN_VALUE;
-  private boolean lastIconified = false;
-  private boolean lastMaximized = false;
 
   private int savedW = -1;
   private int savedH = -1;
@@ -41,45 +35,6 @@ public final class WindowMinimizeHandler {
     return INSTANCE;
   }
 
-  private void logSnapshot(long handle, String tag) {
-    int[] px = new int[1], py = new int[1];
-    int[] sw = new int[1], sh = new int[1];
-    double[] cx = new double[1], cy = new double[1];
-    GLFW.glfwGetWindowPos(handle, px, py);
-    GLFW.glfwGetWindowSize(handle, sw, sh);
-    GLFW.glfwGetCursorPos(handle, cx, cy);
-    boolean iconified = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_ICONIFIED) == GLFW.GLFW_TRUE;
-    boolean maximized = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_MAXIMIZED) == GLFW.GLFW_TRUE;
-    LOGGER.info(
-        "[{}] pos=({},{}) size={}x{} iconified={} maximized={} cursorWin=({},{}) cursorScreen=({},{})",
-        tag,
-        px[0],
-        py[0],
-        sw[0],
-        sh[0],
-        iconified,
-        maximized,
-        (int) cx[0],
-        (int) cy[0],
-        px[0] + (int) cx[0],
-        py[0] + (int) cy[0]);
-  }
-
-  private void startMonitoring(long handle) {
-    int[] sw = new int[1], sh = new int[1];
-    int[] px = new int[1], py = new int[1];
-    GLFW.glfwGetWindowSize(handle, sw, sh);
-    GLFW.glfwGetWindowPos(handle, px, py);
-    lastW = sw[0];
-    lastH = sh[0];
-    lastX = px[0];
-    lastY = py[0];
-    lastIconified = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_ICONIFIED) == GLFW.GLFW_TRUE;
-    lastMaximized = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_MAXIMIZED) == GLFW.GLFW_TRUE;
-    monitorTicksLeft = MONITOR_TICKS;
-    LOGGER.info("[monitor] start ({} ticks)", MONITOR_TICKS);
-  }
-
   public void tickMonitor() {
     if (monitorTicksLeft <= 0) return;
     Minecraft client = Minecraft.getInstance();
@@ -93,24 +48,6 @@ public final class WindowMinimizeHandler {
     int[] px = new int[1], py = new int[1];
     GLFW.glfwGetWindowSize(h, sw, sh);
     GLFW.glfwGetWindowPos(h, px, py);
-    boolean ic = GLFW.glfwGetWindowAttrib(h, GLFW.GLFW_ICONIFIED) == GLFW.GLFW_TRUE;
-    boolean mx = GLFW.glfwGetWindowAttrib(h, GLFW.GLFW_MAXIMIZED) == GLFW.GLFW_TRUE;
-
-    if (sw[0] != lastW || sh[0] != lastH) {
-      double[] cx = new double[1], cy = new double[1];
-      GLFW.glfwGetCursorPos(h, cx, cy);
-      LOGGER.info(
-          "[monitor] size {}x{} -> {}x{} cursorWin=({},{}) ticksLeft={}",
-          lastW,
-          lastH,
-          sw[0],
-          sh[0],
-          (int) cx[0],
-          (int) cy[0],
-          monitorTicksLeft);
-      lastW = sw[0];
-      lastH = sh[0];
-    }
 
     if (!recoveryAttempted
         && hasSavedState
@@ -138,38 +75,8 @@ public final class WindowMinimizeHandler {
             }
           });
     }
-    if (px[0] != lastX || py[0] != lastY) {
-      LOGGER.info(
-          "[monitor] pos ({},{}) -> ({},{}) ticksLeft={}",
-          lastX,
-          lastY,
-          px[0],
-          py[0],
-          monitorTicksLeft);
-      lastX = px[0];
-      lastY = py[0];
-    }
-    if (ic != lastIconified) {
-      double[] cx = new double[1], cy = new double[1];
-      GLFW.glfwGetCursorPos(h, cx, cy);
-      LOGGER.info(
-          "[monitor] iconified {} -> {} cursorWin=({},{}) ticksLeft={}",
-          lastIconified,
-          ic,
-          (int) cx[0],
-          (int) cy[0],
-          monitorTicksLeft);
-      lastIconified = ic;
-    }
-    if (mx != lastMaximized) {
-      LOGGER.info("[monitor] maximized {} -> {} ticksLeft={}", lastMaximized, mx, monitorTicksLeft);
-      lastMaximized = mx;
-    }
 
     monitorTicksLeft--;
-    if (monitorTicksLeft == 0) {
-      LOGGER.info("[monitor] stop");
-    }
   }
 
   public void minimizeWindow() {
@@ -182,7 +89,6 @@ public final class WindowMinimizeHandler {
     boolean isMinimized = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_ICONIFIED) == GLFW.GLFW_TRUE;
 
     if (!isMinimized) {
-      logSnapshot(handle, "before-minimize");
       int[] sw = new int[1], sh = new int[1];
       int[] px = new int[1], py = new int[1];
       GLFW.glfwGetWindowSize(handle, sw, sh);
@@ -229,16 +135,14 @@ public final class WindowMinimizeHandler {
     boolean isMinimized = GLFW.glfwGetWindowAttrib(handle, GLFW.GLFW_ICONIFIED) == GLFW.GLFW_TRUE;
 
     if (isMinimized) {
-      logSnapshot(handle, "before-restore");
       client.execute(
           () -> {
             GLFW.glfwRestoreWindow(handle);
             GLFW.glfwFocusWindow(handle);
             GLFW.glfwRequestWindowAttention(handle);
 
-            logSnapshot(handle, "after-restore");
             recoveryAttempted = false;
-            startMonitoring(handle);
+            monitorTicksLeft = MONITOR_TICKS;
 
             ReminderHandler.getInstance().lastAudioReminderTick = -Timing.REMINDER_INTERVAL_TICKS;
           });
