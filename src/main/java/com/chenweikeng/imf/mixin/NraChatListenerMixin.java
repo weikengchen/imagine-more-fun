@@ -4,6 +4,7 @@ import com.chenweikeng.imf.nra.NotRidingAlertClient;
 import com.chenweikeng.imf.nra.audio.OpenAudioMcService;
 import com.chenweikeng.imf.nra.config.ClosedCaptionMode;
 import com.chenweikeng.imf.nra.config.ModConfig;
+import com.chenweikeng.imf.nra.dailyplan.DailyPlanManager;
 import com.chenweikeng.imf.nra.handler.ClosedCaptionHolder;
 import com.chenweikeng.imf.nra.handler.HibernationHandler;
 import com.chenweikeng.imf.nra.handler.ReminderHandler;
@@ -32,6 +33,7 @@ public class NraChatListenerMixin {
   private static final String ATTRACTION_OVERVIEW_MARKER =
       "<<-----------| Attraction Overview |----------->>";
   private static final String CC_MARKER = "[CC]";
+  private static final String DAILY_OBJECTIVE_COMPLETED_MARKER = "(!): Daily Objective Completed";
 
   @Inject(at = @At("HEAD"), method = "handleSystemMessage", cancellable = true)
   private void onGameMessage(Component message, boolean overlay, CallbackInfo ci) {
@@ -98,6 +100,17 @@ public class NraChatListenerMixin {
     if (PimClient.isImagineFunServer() && msg.startsWith(" + (") && msg.contains("Kingdom Coin")) {
       SessionTracker.getInstance().onPinHoarderTrade();
       PinHoarderHelper.onTradeCompleted();
+    }
+
+    // The Daily Objective completion message fires right after the ride overview, so the player's
+    // last ride is the quest's ride. Pinning serverCompleted lets the plan dedup keep treating
+    // the quest as "owned" by the matching layer even if a stale snapshot still lists it.
+    if (msg.contains(DAILY_OBJECTIVE_COMPLETED_MARKER)) {
+      RideName lastRide = LastRideHolder.getLastRide();
+      if (lastRide != null && lastRide != RideName.UNKNOWN) {
+        DailyPlanManager.getInstance().markQuestServerCompleted(lastRide.toMatchString());
+      }
+      return;
     }
 
     if (!msg.contains(RIDE_OVERVIEW_MARKER) && !msg.contains(ATTRACTION_OVERVIEW_MARKER)) return;

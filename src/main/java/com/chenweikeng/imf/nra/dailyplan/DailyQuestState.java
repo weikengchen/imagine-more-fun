@@ -99,7 +99,7 @@ public final class DailyQuestState {
       return out;
     }
     for (DailyPlanLayer layer : plan.layers) {
-      if (!layer.fromDailyQuest || layer.completed) {
+      if (!layer.fromDailyQuest || layer.serverCompleted) {
         continue;
       }
       List<DailyPlanNode> nodes = layer.nodes;

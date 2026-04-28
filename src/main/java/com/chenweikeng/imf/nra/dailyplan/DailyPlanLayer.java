@@ -29,6 +29,16 @@ public class DailyPlanLayer {
    */
   public boolean fromDailyQuest;
 
+  /**
+   * Set to true when the chat reports {@code (!): Daily Objective Completed} for this layer's ride.
+   * Used as the dedup oracle: a quest layer stays "pinned" (blocks re-adding the same ride) until
+   * the server confirms completion, even after the local {@link #completed} flag flips. This
+   * prevents the duplicate that occurs when local count reaches the target but the server hasn't
+   * credited the quest yet — re-opening the Daily Objectives screen would otherwise re-capture the
+   * still-pending quest and add a second layer.
+   */
+  public boolean serverCompleted;
+
   public DailyPlanLayer() {}
 
   public DailyPlanLayer(LayerType type, List<DailyPlanNode> nodes) {
