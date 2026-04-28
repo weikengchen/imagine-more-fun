@@ -56,3 +56,7 @@ src/main/resources/native/windows/WebView2Loader.dll
 native/windows/webview-helper.exe
 native/windows/WebView2Loader.dll
 native/windows/status-helper.exe
+
+# Personal Claude Code overrides — not for the team.
+.claude/settings.local.json
+.claude/worktrees/
