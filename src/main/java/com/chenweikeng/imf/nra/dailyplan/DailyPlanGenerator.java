@@ -162,6 +162,7 @@ public final class DailyPlanGenerator {
     nodes.add(node);
     DailyPlanLayer layer = new DailyPlanLayer(LayerType.SINGLE, nodes);
     layer.fromDailyQuest = true;
+    layer.questWindowKey = DailyQuestState.currentWindowKey();
 
     DailyQuestSnapshot snap = DailyQuestState.getInstance().getSnapshot();
     if (snap != null && snap.rideCountsAtCapture != null) {

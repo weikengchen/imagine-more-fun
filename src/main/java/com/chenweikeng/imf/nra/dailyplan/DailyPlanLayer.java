@@ -30,14 +30,12 @@ public class DailyPlanLayer {
   public boolean fromDailyQuest;
 
   /**
-   * Set to true when the chat reports {@code (!): Daily Objective Completed} for this layer's ride.
-   * Used as the dedup oracle: a quest layer stays "pinned" (blocks re-adding the same ride) until
-   * the server confirms completion, even after the local {@link #completed} flag flips. This
-   * prevents the duplicate that occurs when local count reaches the target but the server hasn't
-   * credited the quest yet — re-opening the Daily Objectives screen would otherwise re-capture the
-   * still-pending quest and add a second layer.
+   * Tag identifying which 8-hour quest window (PT) the source quest belonged to when this layer was
+   * added — e.g. {@code "2026-04-28-T08"} for the 08:00–16:00 window on 2026-04-28. Quest layers
+   * from past windows do not pin their ride for dedup purposes, so a fresh quest in a new window is
+   * allowed to add another layer for the same ride.
    */
-  public boolean serverCompleted;
+  public String questWindowKey;
 
   public DailyPlanLayer() {}
 

@@ -56,38 +56,6 @@ public final class DailyPlanManager {
   }
 
   /**
-   * Marks the first incomplete quest layer for {@code rideMatchName} as server-confirmed completed
-   * and persists the plan. Called from the chat listener when {@code (!): Daily Objective
-   * Completed} fires after a ride. Returns true when a layer was found and flipped.
-   *
-   * <p>The flag is the dedup oracle in {@link DailyQuestState#nextEligibleForPlan}: until it's set,
-   * the quest layer keeps the ride "pinned" so a re-capture of the still-pending quest doesn't add
-   * a second layer.
-   */
-  public synchronized boolean markQuestServerCompleted(String rideMatchName) {
-    if (rideMatchName == null) {
-      return false;
-    }
-    DailyPlan plan = getOrCreateToday();
-    if (plan == null || plan.layers == null) {
-      return false;
-    }
-    for (DailyPlanLayer layer : plan.layers) {
-      if (!layer.fromDailyQuest || layer.serverCompleted || layer.nodes == null) {
-        continue;
-      }
-      for (DailyPlanNode node : layer.nodes) {
-        if (node != null && rideMatchName.equals(node.ride)) {
-          layer.serverCompleted = true;
-          DailyPlanStorage.save(plan);
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  /**
    * Wraps each legacy {@code nodes} entry in a SINGLE layer, preserving {@code completed} state.
    * Returns true if migration happened and the caller should persist.
    */

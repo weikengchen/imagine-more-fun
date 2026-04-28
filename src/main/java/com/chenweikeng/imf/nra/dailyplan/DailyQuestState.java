@@ -9,7 +9,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDate;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +25,15 @@ import java.util.Set;
  */
 public final class DailyQuestState {
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
+  /**
+   * Server quest refresh schedule: every 8 hours starting at midnight Pacific (00:00, 08:00,
+   * 16:00). The plan only honours a captured snapshot — and only treats a quest layer as "pinning"
+   * its ride — within the same 8-hour window.
+   */
+  private static final ZoneId QUEST_REFRESH_ZONE = ZoneId.of("America/Los_Angeles");
+
+  private static final int WINDOW_HOURS = 8;
 
   private static DailyQuestState instance;
 
@@ -53,16 +64,29 @@ public final class DailyQuestState {
   }
 
   /**
-   * Returns the next quest the plan should pin as a new layer, or empty if either there are no
-   * pending quests, the snapshot is stale, or every pending quest is already pinned in an
-   * incomplete quest layer.
+   * Returns the next quest the plan should pin as a new layer, or empty if there is nothing to do
+   * right now.
+   *
+   * <p>Decision is scoped to the <em>current 8-hour window</em>:
+   *
+   * <ol>
+   *   <li>The snapshot is only consulted if it was captured in the same window as now (otherwise it
+   *       pre-dates the server's last refresh and is stale).
+   *   <li>A quest's ride only counts as already-pinned if some quest layer in the plan was added in
+   *       the current window for that ride. Layers from earlier windows do not block.
+   *   <li>Within the current window, layers pin regardless of local completion state — so once a
+   *       quest layer is added, re-opening the Daily Objectives screen during the same window will
+   *       not produce a duplicate even if the local layer auto-completed before the server credited
+   *       the quest.
+   * </ol>
    */
   public synchronized Optional<DailyQuest> nextEligibleForPlan(DailyPlan plan) {
+    String currentWindow = currentWindowKey();
     DailyQuestSnapshot snap = getSnapshot();
-    if (!isFresh(snap)) {
+    if (!isFresh(snap, currentWindow)) {
       return Optional.empty();
     }
-    Set<String> alreadyPinned = ridesPinnedAsActiveQuests(plan);
+    Set<String> alreadyPinned = ridesPinnedInWindow(plan, currentWindow);
     for (DailyQuest q : snap.quests) {
       if (q == null || q.rideMatchName == null) {
         continue;
@@ -78,28 +102,45 @@ public final class DailyQuestState {
     return Optional.empty();
   }
 
+  /** Returns the 8h-window key for {@code now}. Public so the generator can stamp new layers. */
+  public static String currentWindowKey() {
+    return windowKeyFor(System.currentTimeMillis());
+  }
+
   /**
-   * "Same local date as today" — coarse but matches the plan's own daily reset and avoids surfacing
-   * yesterday's quests after the server's overnight refresh. The user opens the screen at least
-   * once per day under normal play.
+   * Window keys look like {@code "2026-04-28-T00"} / {@code "-T08"} / {@code "-T16"}, identifying
+   * the 8-hour bucket in Pacific time the timestamp falls into. Equality of two keys means
+   * "captured in the same server-quest refresh window".
    */
-  static boolean isFresh(DailyQuestSnapshot snap) {
+  static String windowKeyFor(long epochMs) {
+    ZonedDateTime z = Instant.ofEpochMilli(epochMs).atZone(QUEST_REFRESH_ZONE);
+    int bucketHour = (z.getHour() / WINDOW_HOURS) * WINDOW_HOURS;
+    return String.format("%s-T%02d", z.toLocalDate(), bucketHour);
+  }
+
+  /**
+   * A snapshot is considered fresh only when it was captured during the current 8h window.
+   * Reopening the Daily Objectives screen always overwrites the snapshot, so under normal play this
+   * is true; once a refresh boundary passes without re-capture, the snapshot becomes stale and
+   * quest injection pauses until the user looks again.
+   */
+  static boolean isFresh(DailyQuestSnapshot snap, String currentWindow) {
     if (snap == null || snap.quests == null || snap.quests.isEmpty()) {
       return false;
     }
-    if (snap.capturedDate == null) {
-      return false;
-    }
-    return snap.capturedDate.equals(LocalDate.now().toString());
+    return currentWindow.equals(windowKeyFor(snap.capturedAtEpochMs));
   }
 
-  private static Set<String> ridesPinnedAsActiveQuests(DailyPlan plan) {
+  private static Set<String> ridesPinnedInWindow(DailyPlan plan, String currentWindow) {
     Set<String> out = new HashSet<>();
     if (plan == null || plan.layers == null) {
       return out;
     }
     for (DailyPlanLayer layer : plan.layers) {
-      if (!layer.fromDailyQuest || layer.serverCompleted) {
+      if (!layer.fromDailyQuest) {
+        continue;
+      }
+      if (!currentWindow.equals(layer.questWindowKey)) {
         continue;
       }
       List<DailyPlanNode> nodes = layer.nodes;
