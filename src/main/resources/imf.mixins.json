@@ -6,6 +6,7 @@
 	"mixins": [],
 	"client": [
 		"ImfAlphaTableContainerScreenMixin",
+		"ImfDailyObjectivesScreenMixin",
 		"ImfInventoryScreenMixin",
 		"ImfScreenInvoker",
 		"NraAvatarRendererMixin",

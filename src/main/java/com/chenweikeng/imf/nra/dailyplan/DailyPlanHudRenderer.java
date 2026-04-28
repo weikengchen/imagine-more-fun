@@ -36,6 +36,7 @@ public final class DailyPlanHudRenderer {
   private static final int COLOR_IDLE_GLYPH = 0xFF888888;
   private static final int COLOR_CONNECTOR = 0xFF555555;
   private static final int COLOR_BADGE = 0xFFBB88FF;
+  private static final int COLOR_QUEST_GOLD = 0xFFFFD700;
 
   private static final int PANEL_BG = 0xB0000000;
   private static final int NODE_BG = 0x60000000;
@@ -260,7 +261,13 @@ public final class DailyPlanHudRenderer {
 
     LayerColumn column = new LayerColumn();
     column.isDone = layer.completed;
-    column.badge = layer.type == LayerType.SINGLE ? null : layer.type.badge();
+    if (layer.fromDailyQuest) {
+      column.badge = "★ DAILY";
+      column.badgeColor = COLOR_QUEST_GOLD;
+    } else if (layer.type != LayerType.SINGLE) {
+      column.badge = layer.type.badge();
+      column.badgeColor = COLOR_BADGE;
+    }
     column.badgeWidth = column.badge == null ? 0 : font.width(column.badge);
 
     int maxNodeWidth = column.badgeWidth;
@@ -321,6 +328,12 @@ public final class DailyPlanHudRenderer {
       layout.progColor = COLOR_DIM;
       layout.borderColor = COLOR_IDLE_GLYPH;
     }
+    if (layer.fromDailyQuest && !layout.isDone) {
+      layout.glyphColor = COLOR_QUEST_GOLD;
+      layout.nameColor = COLOR_QUEST_GOLD;
+      layout.progColor = COLOR_QUEST_GOLD;
+      layout.borderColor = COLOR_QUEST_GOLD;
+    }
 
     layout.name = ride.getShortName().toUpperCase(Locale.ENGLISH);
     layout.prog = layout.isDone ? ("\u00D7" + node.k) : (progress + "/" + node.k);
@@ -343,7 +356,7 @@ public final class DailyPlanHudRenderer {
       int maxBadgeHeight) {
     if (column.badge != null) {
       int badgeX = left + (column.width - column.badgeWidth) / 2;
-      context.drawString(font, column.badge, badgeX, badgeRowY, COLOR_BADGE, false);
+      context.drawString(font, column.badge, badgeX, badgeRowY, column.badgeColor, false);
     }
 
     int y = firstNodeY;
@@ -484,6 +497,7 @@ public final class DailyPlanHudRenderer {
   private static final class LayerColumn {
     String badge;
     int badgeWidth;
+    int badgeColor = COLOR_BADGE;
     boolean isDone;
     List<NodeLayout> nodes = new ArrayList<>();
     int width;

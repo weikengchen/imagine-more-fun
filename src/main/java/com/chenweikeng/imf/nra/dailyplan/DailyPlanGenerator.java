@@ -8,8 +8,11 @@ import com.chenweikeng.imf.nra.ride.RideName;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
@@ -127,12 +130,49 @@ public final class DailyPlanGenerator {
       plan.layers = new ArrayList<>();
     }
     for (int i = 0; i < count; i++) {
-      DailyPlanLayer layer = generateLayer(plan.layers, eligible, random);
+      DailyPlanLayer layer = nextDailyQuestLayer(plan);
+      if (layer == null) {
+        layer = generateLayer(plan.layers, eligible, random);
+      }
       if (layer == null) {
         break;
       }
       plan.layers.add(layer);
     }
+  }
+
+  /**
+   * Builds a quest-layer for the next pending daily quest the plan hasn't pinned yet, or null when
+   * there is none (no fresh snapshot, all quests already pinned, or the quest's ride no longer
+   * resolves). Pre-seeds {@link DailyPlanLayer#baselineCounts} so the activation-time delta lines
+   * up with the server-reported observed progress at capture time.
+   */
+  private static DailyPlanLayer nextDailyQuestLayer(DailyPlan plan) {
+    Optional<DailyQuest> next = DailyQuestState.getInstance().nextEligibleForPlan(plan);
+    if (next.isEmpty()) {
+      return null;
+    }
+    DailyQuest quest = next.get();
+    RideName ride = RideName.fromMatchString(quest.rideMatchName);
+    if (ride == RideName.UNKNOWN) {
+      return null;
+    }
+    DailyPlanNode node = new DailyPlanNode(quest.rideMatchName, Math.max(1, quest.target));
+    List<DailyPlanNode> nodes = new ArrayList<>(1);
+    nodes.add(node);
+    DailyPlanLayer layer = new DailyPlanLayer(LayerType.SINGLE, nodes);
+    layer.fromDailyQuest = true;
+
+    DailyQuestSnapshot snap = DailyQuestState.getInstance().getSnapshot();
+    if (snap != null && snap.rideCountsAtCapture != null) {
+      Integer atCapture = snap.rideCountsAtCapture.get(quest.rideMatchName);
+      if (atCapture != null) {
+        Map<String, Integer> baseline = new HashMap<>();
+        baseline.put(quest.rideMatchName, atCapture - quest.observedProgress);
+        layer.baselineCounts = baseline;
+      }
+    }
+    return layer;
   }
 
   private static DailyPlanLayer generateLayer(

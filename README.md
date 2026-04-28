@@ -26,6 +26,7 @@ All features activate only while connected to an `*.imaginefun.net` server.
 
 - **Alert when not riding** — configurable alert sound with a minimum-ride-time filter.
 - **Ride tracker / Strategy HUD** — on-screen list of rides toward a configurable goal (1K / 5K / 10K), with V0 / V1 / V2 layouts, sortable by several rules, optional closest-ride highlight, customizable colors, and configurable background opacity. Display can be always / only-when-riding / only-when-not-riding / never, and filtered to only autograbbing rides.
+- **Ride Plan HUD** — chained "do this, then that" daily plan rendered top-center: SINGLE / OR / AND layers with live progress, animated power flow, and automatic tail extension as you complete steps. Daily Objectives parsed from the server's quest GUI are auto-injected as gold `★ DAILY` layers, so each new layer added after a finish prefers a pending quest whose ride isn't already pinned. Selected via the Ride Hub Mode config setting (alternative to the Strategy HUD).
 - **Setup wizard** — guided first-run tutorial (`/imf setup`) covering alerts, visuals, autograbbing, UI hiding, ride selection, tracker, session extras, and profiles.
 - **Config profiles** — named saved configs with history, diff summaries, and one-command switching (`/imf profile <name>`).
 - **Ride report** — daily ride summary screen (`/ridereport [date]`), plus popup / chat / silent notification modes.

@@ -66,6 +66,10 @@ public final class ImfStorage {
     return root().resolve("nra-daily-plan.json");
   }
 
+  public static Path nraDailyQuests() {
+    return root().resolve("nra-daily-quests.json");
+  }
+
   /** Directory for user-overridden WebView helper binaries (OpenAudioMc integration). */
   public static Path nativeHelperDir() {
     return root().resolve("native");

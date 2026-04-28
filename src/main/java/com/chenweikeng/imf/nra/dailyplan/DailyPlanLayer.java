@@ -21,6 +21,14 @@ public class DailyPlanLayer {
    */
   public Map<String, Integer> baselineCounts;
 
+  /**
+   * True when the layer was injected by the plan generator from a parsed daily quest rather than
+   * randomly chosen. Renders with a distinct gold treatment in the HUD. Quest layers also carry a
+   * pre-set {@link #baselineCounts} so progress reflects the server-reported observed progress at
+   * activation time.
+   */
+  public boolean fromDailyQuest;
+
   public DailyPlanLayer() {}
 
   public DailyPlanLayer(LayerType type, List<DailyPlanNode> nodes) {
