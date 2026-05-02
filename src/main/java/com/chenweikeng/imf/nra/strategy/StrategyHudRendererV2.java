@@ -596,6 +596,8 @@ public class StrategyHudRendererV2 {
         sb.append("% ");
         sb.append(TimeFormatUtil.formatDuration(remainingSeconds));
         sb.append(" left)");
+      } else if (progress != null) {
+        sb.append(" (").append(progress).append("%)");
       }
 
       if (goal != null) {

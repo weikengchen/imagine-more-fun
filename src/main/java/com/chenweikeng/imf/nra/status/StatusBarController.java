@@ -75,6 +75,12 @@ public final class StatusBarController {
     if (currentRide == null) {
       return NO_TIMING_PLACEHOLDER;
     }
+    if (currentRide == RideName.DAVY_CROCKETTS_EXPLORER_CANOES) {
+      // Canoe has no fixed duration; report position-based progress published by
+      // CanoeHelperClient instead.
+      Integer percent = CurrentRideHolder.getCurrentProgressPercent();
+      return percent == null ? NO_TIMING_PLACEHOLDER : percent + "%";
+    }
     Integer elapsed = CurrentRideHolder.getElapsedSeconds();
     if (elapsed == null) {
       return NO_TIMING_PLACEHOLDER;

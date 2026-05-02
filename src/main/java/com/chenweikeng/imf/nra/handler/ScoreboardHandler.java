@@ -192,7 +192,12 @@ public class ScoreboardHandler {
       CurrentRideHolder.setCurrentRide(resolved);
       LastRideHolder.setLastRide(resolved);
 
-      if (resolved != RideName.DAVY_CROCKETTS_EXPLORER_CANOES && timePrefix != null) {
+      if (resolved == RideName.DAVY_CROCKETTS_EXPLORER_CANOES) {
+        // Canoe progress is published by CanoeHelperClient from the boat's position on the
+        // reference track. Don't overwrite it here, but do clear elapsedSeconds — the canoe ride
+        // has no fixed duration so an elapsed-based reading is meaningless.
+        CurrentRideHolder.setElapsedSeconds(null);
+      } else if (timePrefix != null) {
         int elapsed = parseTimeString(timePrefix);
         if (elapsed >= 0) {
           int rideTimeSeconds = resolved.getRideTime();

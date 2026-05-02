@@ -1,6 +1,7 @@
 package com.chenweikeng.imf;
 
 import com.chenweikeng.imf.nra.NotRidingAlertClient;
+import com.chenweikeng.imf.nra.canoe.CanoeHelperClient;
 import com.chenweikeng.imf.pim.PimClient;
 import com.chenweikeng.imf.skincache.SkinCacheMod;
 import net.fabricmc.api.ClientModInitializer;
@@ -35,5 +36,6 @@ public class ImfClient implements ClientModInitializer {
     new NotRidingAlertClient().onInitializeClient();
     new PimClient().onInitializeClient();
     new SkinCacheMod().onInitializeClient();
+    CanoeHelperClient.init();
   }
 }

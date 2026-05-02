@@ -310,6 +310,8 @@ public class StrategyHudRendererV1 {
         }
         String timeLeft = TimeFormatUtil.formatDuration(remainingSeconds);
         rideName += " (" + progress + "%, " + timeLeft + " left)";
+      } else if (progress != null) {
+        rideName += " (" + progress + "%)";
       }
       status = RideStatus.RIDING;
     } else if (currentRide == null

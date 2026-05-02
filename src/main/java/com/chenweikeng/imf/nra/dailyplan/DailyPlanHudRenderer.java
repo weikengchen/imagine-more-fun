@@ -457,6 +457,9 @@ public final class DailyPlanHudRenderer {
             .append("% \u00B7 ")
             .append(TimeFormatUtil.formatDuration(remaining))
             .append(" left");
+      } else if (progress != null) {
+        // Canoe: position-based progress, no remaining-time estimate.
+        sb.append(" \u00B7 ").append(progress).append("%");
       }
       return new RidingStatus(sb.toString(), ModConfig.currentSetting.trackerRidingColor);
     }

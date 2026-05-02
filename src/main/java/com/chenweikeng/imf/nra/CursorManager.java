@@ -1,5 +1,6 @@
 package com.chenweikeng.imf.nra;
 
+import com.chenweikeng.imf.nra.canoe.CanoeHelperClient;
 import com.chenweikeng.imf.nra.compat.MonkeycraftCompat;
 import com.chenweikeng.imf.nra.config.CursorReleaseTiming;
 import com.chenweikeng.imf.nra.config.ModConfig;
@@ -21,6 +22,7 @@ public class CursorManager {
   private boolean wasRiding = false;
   private boolean wasOnVehicle = false;
   private boolean wasPassenger = false;
+  private boolean wasReadyToMinimize = false;
   private boolean minimizedDuringAutograb = false;
   private boolean autograbFailureRestored = false;
   private long pendingZoneMinimizeTick = -1;
@@ -115,8 +117,14 @@ public class CursorManager {
       boolean shouldMinimizeOnZoneEntry =
           pendingZoneMinimizeTick != -1
               && (currentTick - pendingZoneMinimizeTick) >= Timing.ZONE_ENTRY_MINIMIZE_DELAY_TICKS;
+      // Defer canoe-mount minimisation until the player has actually started the canoe (first
+      // speed-bar update). Otherwise the window minimises before the player can right-click the
+      // paddle to begin the ride. For non-canoe rides the gate is always open, preserving the
+      // original on-mount behaviour. We track readiness as an edge with `wasReadyToMinimize` so
+      // the minimize fires the tick the canoe starts, not just on the mount tick itself.
+      boolean readyToMinimize = isOnVehicle && isReadyToMinimizeForCurrentRide();
       boolean shouldMinimizeOnVehicleMount =
-          !wasOnVehicle && isOnVehicle && !minimizedDuringAutograb;
+          !wasReadyToMinimize && readyToMinimize && !minimizedDuringAutograb;
 
       boolean shouldMinimizeOnThisTick =
           switch (minimizeTiming) {
@@ -206,6 +214,20 @@ public class CursorManager {
     wasRiding = isRiding;
     wasOnVehicle = isOnVehicle;
     wasPassenger = isPassenger;
+    wasReadyToMinimize = isOnVehicle && isReadyToMinimizeForCurrentRide();
+  }
+
+  /**
+   * Returns true if the current ride is ready to be minimized over. For canoes, this is gated on
+   * the canoe actually starting (first speed-bar update). For all other rides, it's always true —
+   * caller must still confirm the player is on a vehicle.
+   */
+  private boolean isReadyToMinimizeForCurrentRide() {
+    RideName currentRide = CurrentRideHolder.getCurrentRide();
+    if (currentRide != RideName.DAVY_CROCKETTS_EXPLORER_CANOES) {
+      return true;
+    }
+    return CanoeHelperClient.get().hasCanoeStarted();
   }
 
   public boolean wasPassenger() {
@@ -268,6 +290,7 @@ public class CursorManager {
     wasRiding = false;
     wasOnVehicle = false;
     wasPassenger = false;
+    wasReadyToMinimize = false;
     minimizedDuringAutograb = false;
     autograbFailureRestored = false;
     pendingZoneMinimizeTick = -1;
