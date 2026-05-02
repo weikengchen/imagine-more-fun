@@ -2,6 +2,8 @@ package com.chenweikeng.imf;
 
 import com.chenweikeng.imf.nra.NotRidingAlertClient;
 import com.chenweikeng.imf.nra.canoe.CanoeHelperClient;
+import com.chenweikeng.imf.nra.spacemountain.SpaceMountainBlockOverride;
+import com.chenweikeng.imf.nra.spacemountain.SpaceMountainStarRenderer;
 import com.chenweikeng.imf.pim.PimClient;
 import com.chenweikeng.imf.skincache.SkinCacheMod;
 import net.fabricmc.api.ClientModInitializer;
@@ -32,6 +34,9 @@ public class ImfClient implements ClientModInitializer {
     } catch (RuntimeException e) {
       LOGGER.error("Storage migration failed; continuing anyway", e);
     }
+
+    SpaceMountainStarRenderer.register();
+    SpaceMountainBlockOverride.init();
 
     new NotRidingAlertClient().onInitializeClient();
     new PimClient().onInitializeClient();
